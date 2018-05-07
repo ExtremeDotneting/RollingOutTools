@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RollingOutTools.Json" Version="1.0.0" />
+    <PackageReference Include="RollingOutTools.Storage" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>
