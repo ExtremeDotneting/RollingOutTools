@@ -14,7 +14,10 @@ It can automatically build CLI from classes, automatically read/write ANY type f
 <br />&nbsp;&nbsp;&nbsp;&nbsp;.Json - just wrapper on Newtonsoft.Json with some extensions.
 <br />&nbsp;&nbsp;&nbsp;&nbsp;.SimpleIoc - wrapper on ioc container. Now use only Autofac. I make it, because i need support of Bridge.NET, where Autofac doesn`t work.
 <br />
+<br />&nbsp;&nbsp;&nbsp;&nbsp;copy_to_nuget_dir.cmd - just macros, that copy nuget packages to my local nuget folder.
+<br />
 <br />To know more, you can read my workflow telegram channel https://t.me/coding_workflow
+<br />
 <br />
 <br />Contacts:
 <br />&nbsp;&nbsp;&nbsp;&nbsp;Vk - https://vk.com/yura_mysko
