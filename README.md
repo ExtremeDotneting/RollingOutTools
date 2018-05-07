@@ -19,7 +19,7 @@ It can automatically build CLI from classes, automatically read/write ANY type f
 <br />
 
 <br />To know more, you can read my workflow telegram channel https://t.me/coding_workflow
-<br />screenshot.jpg
+<br />
 <br />Contacts:
 <br />&nbsp;&nbsp;&nbsp;&nbsp;Vk - https://vk.com/yura_mysko
 <br />&nbsp;&nbsp;&nbsp;&nbsp;Youtube - https://www.youtube.com/channel/UCiIj3Q0z1pNJ2KyNRcspoZw
