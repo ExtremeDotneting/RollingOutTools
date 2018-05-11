@@ -29,13 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RollingOutTools.Storage", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RollingOutTools.Storage.JsonFileStorage", "RollingOutTools.Storage.JsonFileStorage\RollingOutTools.Storage.JsonFileStorage.csproj", "{E8056F3A-5CEC-491E-9B96-984BAB32AA1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollingOutTools.Net", "RollingOutTools.Net\RollingOutTools.Net.csproj", "{BFF5B137-189D-4081-9DCC-382C05C1B1AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RollingOutTools.Net", "RollingOutTools.Net\RollingOutTools.Net.csproj", "{BFF5B137-189D-4081-9DCC-382C05C1B1AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollingOutTools.Collections", "RollingOutTools.Collections\RollingOutTools.Collections.csproj", "{AF6896A8-D401-4F02-AA9E-BB489A2D6CCF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollingOutTools.CmdLine.RemoteConsole.Client", "RollingOutTools.CmdLine.RemoteConsole.Client\RollingOutTools.CmdLine.RemoteConsole.Client.csproj", "{B1601A4A-3BDB-4BF5-933B-3DE3EE934094}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollingOutTools.CmdLine.RemoteConsole.Server", "RollingOutTools.CmdLine.RemoteConsole.Server\RollingOutTools.CmdLine.RemoteConsole.Server.csproj", "{0677AC19-ED7B-4A52-B873-BB176AE6E10A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RollingOutTools.Collections", "RollingOutTools.Collections\RollingOutTools.Collections.csproj", "{AF6896A8-D401-4F02-AA9E-BB489A2D6CCF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,14 +99,6 @@ Global
 		{AF6896A8-D401-4F02-AA9E-BB489A2D6CCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF6896A8-D401-4F02-AA9E-BB489A2D6CCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF6896A8-D401-4F02-AA9E-BB489A2D6CCF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B1601A4A-3BDB-4BF5-933B-3DE3EE934094}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B1601A4A-3BDB-4BF5-933B-3DE3EE934094}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1601A4A-3BDB-4BF5-933B-3DE3EE934094}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1601A4A-3BDB-4BF5-933B-3DE3EE934094}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0677AC19-ED7B-4A52-B873-BB176AE6E10A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0677AC19-ED7B-4A52-B873-BB176AE6E10A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0677AC19-ED7B-4A52-B873-BB176AE6E10A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0677AC19-ED7B-4A52-B873-BB176AE6E10A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
