@@ -10,59 +10,86 @@ namespace RollingOutTools.CmdLine
     /// <summary>
     /// Класс-адаптер для класса Console. Добавляет некоторые крутые фичи и еще я его использую для абстракции от консоли, на случай если захочу сделать веб версию консоли.
     /// </summary>
-    public static class CmdLineExtension
+    public class CmdLineExtension
     {
+        #region Static part
+        static CmdLineExtension _inst;
+        public static CmdLineExtension Inst
+        {
+            get
+            {
+                if (_inst == null)
+                {
+                    throw new Exception("Before use CmdLineExtension.Inst you must init it.");
+                }
+                return _inst;
+            }
+        }
+
+        /// <summary>
+        /// Init singleton console. You can access it through CmdLineExtension.Inst .
+        /// </summary>
+        /// <param name="consoleHandler">If null, will use default handler.</param>
+        public static void Init(IConsoleHandler consoleHandler=null)
+        {
+            if (_inst != null)
+            {
+                throw new Exception("Console was inited before.");
+            }
+            _inst = new CmdLineExtension(
+                consoleHandler ?? new DefaultConsoleHandler()
+                );
+        }
+        #endregion
+
+       
+
+        public IConsoleHandler ConsoleHandler { get; private set; }
+
         /// <summary>
         /// Для сложных методов, типа считывания сложных типов через json editor вы можете отключить исключения. Тогда, к примеру, если пользователь допустит 
         /// ошибку при редактировании json файла - ему выведут сообщение, но исключение не завершит работу программы.
         /// </summary>
-        public static bool ThrowConsoleParseExeptions { get; } = false;
-        const string jsonEditorFilePath = "json_editor_buf.json";
+        public bool ThrowConsoleParseExeptions { get; } = false;       
 
-        public static void WriteLineColored(object objToWrite, ConsoleColor cc, bool prettyJson = false)
+        public CmdLineExtension(IConsoleHandler consoleHandler)
         {
-            var current = Console.ForegroundColor;
-            Console.ForegroundColor = cc;
-            WriteLine(objToWrite, prettyJson);
-            Console.ForegroundColor = current;
+            if (consoleHandler == null)
+                throw new NullReferenceException();
+            ConsoleHandler = consoleHandler;
         }
 
-        public static void WriteColored(object objToWrite, ConsoleColor cc, bool prettyJson = false)
+        public void WriteLine()
         {
-            var current = Console.ForegroundColor;
-            Console.ForegroundColor = cc;
-            Write(objToWrite, prettyJson);
-            Console.ForegroundColor = current;
+            ConsoleHandler.WriteLine();
         }
 
-        /// <summary>
-        /// Отличается от стандартного метода Console тем, что если передаваемый объект не IConvertible, то он будет сериализирован в json строку.
-        /// </summary>
-        public static void WriteLine(object objToWrite, bool prettyJson=false)
+        public string ReadLine()
         {
-            Console.WriteLine(
-                JsonSerializeHelper.Inst.ToConvertibleOrJson(objToWrite, new JsonSerializeOptions() { WithNormalFormating = prettyJson })
-                );
+            return ConsoleHandler.ReadLine();
         }
 
         /// <summary>
         /// Отличается от стандартного метода Console тем, что если передаваемый объект не IConvertible, то он будет сериализирован в json строку.
         /// </summary>
-        public static void Write(object objToWrite, bool prettyJson = false)
+        public void WriteLine(object objToWrite, ConsoleColor? cc = null, bool prettyJson = false)
         {
-            Console.Write(
-               JsonSerializeHelper.Inst.ToConvertibleOrJson(objToWrite, new JsonSerializeOptions() { WithNormalFormating = prettyJson })
+            ConsoleHandler.WriteLine(
+                JsonSerializeHelper.Inst.ToConvertibleOrJson(objToWrite, new JsonSerializeOptions() { WithNormalFormating = prettyJson }),
+                cc
                 );
         }
 
-        public static void WriteLine()
-        {
-            Console.WriteLine();
-        }
 
-        public static string ReadLine()
+        /// <summary>
+        /// Отличается от стандартного метода Console тем, что если передаваемый объект не IConvertible, то он будет сериализирован в json строку.
+        /// </summary>
+        public void Write(object objToWrite, ConsoleColor? cc = null, bool prettyJson = false)
         {
-            return Console.ReadLine();
+            ConsoleHandler.Write(
+                JsonSerializeHelper.Inst.ToConvertibleOrJson(objToWrite, new JsonSerializeOptions() { WithNormalFormating = prettyJson }),
+                cc
+                );
         }
 
         /// <summary>
@@ -71,7 +98,7 @@ namespace RollingOutTools.CmdLine
         /// <para></para>
         /// Еще этот метод может кешировать значение по имени ресурса, используя его можно с легкостью реализовать астозаполнение и даже автоматическое тестирование.
         /// </summary>
-        public static T ReadResource<T>(string resourceName, ReadResourseOptions options = null)
+        public T ReadResource<T>(string resourceName, ReadResourseOptions options = null)
         {
             return (T)readResource(typeof(T), 10, resourceName, options, default(T));
         }
@@ -82,12 +109,12 @@ namespace RollingOutTools.CmdLine
         /// <para></para>
         /// Еще этот метод может кешировать значение по имени ресурса, используя его можно с легкостью реализовать астозаполнение и даже автоматическое тестирование.
         /// </summary>
-        public static object ReadResource(Type typeOfResource, string resourceName, ReadResourseOptions options = null)
+        public object ReadResource(Type typeOfResource, string resourceName, ReadResourseOptions options = null)
         {            
             return readResource(typeOfResource, 10, resourceName, options, null);
         }
 
-        static object readResource(Type objectType, int tryesCount, string resourceName, ReadResourseOptions options, object defaultValue)
+        object readResource(Type objectType, int tryesCount, string resourceName, ReadResourseOptions options, object defaultValue)
         {
             if (options == null)
                 options = new ReadResourseOptions();
@@ -95,9 +122,9 @@ namespace RollingOutTools.CmdLine
             var longResName = resourceName + "";
             try
             {
-                CmdLineExtension.WriteLineColored($"Resource '{longResName}' with type {objectType} requested from console.", ConsoleColor.Yellow);
+                this.WriteLine($"Resource '{longResName}' with type {objectType} requested from console.", ConsoleColor.Yellow);
                 if (!string.IsNullOrWhiteSpace(hint))
-                    CmdLineExtension.WriteLineColored($"Hint: {hint}", ConsoleColor.Yellow);
+                    this.WriteLine($"Hint: {hint}", ConsoleColor.Yellow);
 
                 string cachedValueString = Storage_HardDrive.Get<string>(longResName).Result;
 
@@ -119,8 +146,8 @@ namespace RollingOutTools.CmdLine
                 }
                 else
                 {
-                    CmdLineExtension.WriteLineColored("Exeption in console resource receiving method: ", ConsoleColor.DarkRed);
-                    CmdLineExtension.WriteLine(("\t" + ex.Message).Replace("\n", "\n\t"));
+                    this.WriteLine("Exeption in console resource receiving method: ", ConsoleColor.DarkRed);
+                    this.WriteLine(("\t" + ex.Message).Replace("\n", "\n\t"));
 
                     //try again
                     return readResource(objectType, tryesCount - 1, resourceName, options, defaultValue);
@@ -128,11 +155,11 @@ namespace RollingOutTools.CmdLine
             }
         }
 
-        static object IfResourceIsDifficult(Type objectType, string longResName, string cachedValueString, object defaultValue, ReadResourseOptions options)
+        object IfResourceIsDifficult(Type objectType, string longResName, string cachedValueString, object defaultValue, ReadResourseOptions options)
         {
             //Else, will be converted by json.
             //
-            CmdLineExtension.WriteColored(
+            this.WriteLine(
                 $"Difficult type. Will be opened in json editor. ",
                 ConsoleColor.Yellow
                 );            
@@ -161,24 +188,26 @@ namespace RollingOutTools.CmdLine
                 return cachedValue;
             }
 
-            CmdLineExtension.ReadLine();
-            File.WriteAllText(
-                jsonEditorFilePath, 
-                JsonSerializeHelper.Inst.ToJson(
-                    objectType, 
-                    cachedValue, 
-                    new JsonSerializeOptions() { WithNormalFormating = true }
-                    )
-                );
+            this.ReadLine();
+            
             bool isAccept;
+            string editedJson = null;
+            string jsonPrototypeString = JsonSerializeHelper.Inst.ToJson(
+                objectType,
+                cachedValue,
+                new JsonSerializeOptions() { WithNormalFormating = true }
+                );
             do
             {
-                Process editorProcess = Process.Start(Environment.CurrentDirectory + "\\" + jsonEditorFilePath);
-                editorProcess.WaitForExit();
-                CmdLineExtension.WriteColored("Accept changes? Press y/n (y): ", ConsoleColor.Yellow);
-                isAccept = CmdLineExtension.ReadLine().Trim().StartsWith("n");
+                editedJson = ConsoleHandler.ReadJson(jsonPrototypeString);
+
+
+                
+
+                this.WriteLine("Accept changes? Press y/n (y): ", ConsoleColor.Yellow);
+                isAccept = this.ReadLine().Trim().StartsWith("n");
             } while (isAccept);
-            string editedJson = File.ReadAllText(jsonEditorFilePath);
+             
 
             object res = JsonSerializeHelper.Inst.FromJson(objectType,editedJson);
 
@@ -190,7 +219,7 @@ namespace RollingOutTools.CmdLine
             //Else, will be converted by json.
         }
 
-        static object IfResourceIsIConvertible(Type objectType, string longResName,string cachedValueString,ReadResourseOptions options)
+        object IfResourceIsIConvertible(Type objectType, string longResName,string cachedValueString,ReadResourseOptions options)
         {
             //If IConvertible
             //
@@ -201,7 +230,7 @@ namespace RollingOutTools.CmdLine
                 cachedValueInHint = cachedValueInHint.Substring(0, 80) + "... ";
             }
 
-            CmdLineExtension.WriteColored(
+            this.WriteLine(
                 $"Input ({cachedValueInHint}): ",
                 ConsoleColor.Yellow
                 );
@@ -210,7 +239,7 @@ namespace RollingOutTools.CmdLine
             string val = "";
             if (!options.UseAutoread)
             {
-                val= CmdLineExtension.ReadLine();
+                val= this.ReadLine();
             }
 
             

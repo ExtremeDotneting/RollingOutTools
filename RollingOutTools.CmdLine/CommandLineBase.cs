@@ -10,10 +10,11 @@ namespace RollingOutTools.CmdLine
     /// <summary>
     /// Базовый класс для генерации cli.
     /// Можно писать методы с входными параметрами (массив строк).
-    /// Вместо Console обязательно используйте CmdLineExtension.
+    /// Вместо Console обязательно используйте this.
     /// </summary>
     public class CommandLineBase
     {
+        CmdLineExtension _cmdLineExtension;
         protected readonly ICmdSwitcher CurrentCmdSwitcher;
         bool _isAutorunEnabled = false;
         bool _isInRun = true;
@@ -50,8 +51,9 @@ namespace RollingOutTools.CmdLine
             }
         }
 
-        public CommandLineBase(ICmdSwitcher cmdSwitcher)
+        public CommandLineBase(ICmdSwitcher cmdSwitcher, CmdLineExtension cmdLineExtension=null)
         {
+            _cmdLineExtension = cmdLineExtension ?? CmdLineExtension.Inst;
             CurrentCmdSwitcher = cmdSwitcher;
             CmdNameAndMethod = CreateReflectionDict();
         }
@@ -59,7 +61,7 @@ namespace RollingOutTools.CmdLine
 
         public virtual void OnStart()
         {
-            CmdLineExtension.WriteLineColored(
+            _cmdLineExtension.WriteLine(
                 $"You have been opened command line '{this.GetType().Name}'. Write 'help' to open commands list.",
                 ConsoleColor.Magenta
                 );
@@ -98,21 +100,21 @@ namespace RollingOutTools.CmdLine
 
                 
             }
-            CmdLineExtension.Write(res.ToString());
+            _cmdLineExtension.Write(res.ToString());
         }
 
         public virtual void OnEveryLoop()
         {
-            CmdLineExtension.WriteColored(
+            _cmdLineExtension.WriteLine(
                 $"cmd ( { LastCmdName ?? ""} ) : ",
                 ConsoleColor.DarkGreen
                 );
 
-            string cmdName = CmdLineExtension.ReadLine();
+            string cmdName = _cmdLineExtension.ReadLine();
             ExecuteCmd(cmdName);
 
 
-            CmdLineExtension.WriteLine();
+            _cmdLineExtension.WriteLine();
 
         }
 
@@ -171,20 +173,20 @@ namespace RollingOutTools.CmdLine
 
                 else
                 {
-                    CmdLineExtension.WriteLine("Command not found.");
+                    _cmdLineExtension.WriteLine("Command not found.");
                 }
             }
             catch (Exception ex)
             {
-                CmdLineExtension.WriteLineColored("Executing command throwed exception: " + ex.ToString(), ConsoleColor.DarkRed);
+                _cmdLineExtension.WriteLine("Executing command throwed exception: " + ex.ToString(), ConsoleColor.DarkRed);
                 //ApiException apiEx = ExceptionsHelper.FindInnerExceptionInAggregateException<ApiException>(ex);
                 //if (apiEx!=null)
                 //{
                 //    var apiErr = apiEx.GetApiError();
                 //    HandleApiError(apiErr);
                 //}
-                CmdLineExtension.WriteColored("\nWant to ignore it? Press y/n (y): ", ConsoleColor.DarkRed);
-                var consoleText = CmdLineExtension.ReadLine();
+                _cmdLineExtension.WriteLine("\nWant to ignore it? Press y/n (y): ", ConsoleColor.DarkRed);
+                var consoleText = _cmdLineExtension.ReadLine();
                 if (consoleText.Trim()=="")
                 {
                     //throw;
@@ -207,7 +209,7 @@ namespace RollingOutTools.CmdLine
         //void HandleApiError(ApiError apiErr)
         //{            
         //    var apiErrStr = JsonSerializeHelper.Inst.ToJson(apiErr, true);
-        //    CmdLineExtension.WriteLineColored("\nApi error: " + apiErrStr, ConsoleColor.DarkRed);
+        //    this.WriteLine("\nApi error: " + apiErrStr, ConsoleColor.DarkRed);
         //}
                 
         /// <summary>
@@ -246,7 +248,7 @@ namespace RollingOutTools.CmdLine
         }
 
         /// <summary>
-        /// Надстройка для получения ресурсов через CmdLineExtension с кешированием и по имени метода из консоли, а не только по имени ресурса.
+        /// Надстройка для получения ресурсов через this с кешированием и по имени метода из консоли, а не только по имени ресурса.
         /// </summary>
         protected T ReadResource<T>(string resourceName, ReadResourseOptions options = null,
            [CallerMemberName]string memberName = null)
@@ -255,7 +257,7 @@ namespace RollingOutTools.CmdLine
         }
 
         /// <summary>
-        /// Надстройка для получения ресурсов через CmdLineExtension с кешированием и по имени метода из консоли, а не только по имени ресурса.
+        /// Надстройка для получения ресурсов через this с кешированием и по имени метода из консоли, а не только по имени ресурса.
         /// </summary>
         protected object ReadResource(Type resourceType,string resourceName, ReadResourseOptions options = null,
           [CallerMemberName]string memberName = null)
@@ -264,7 +266,7 @@ namespace RollingOutTools.CmdLine
             options = options ?? new ReadResourseOptions();
             options.UseAutoread = _isAutorunEnabled;
 
-            return CmdLineExtension.ReadResource(resourceType,memberName + "." + resourceName, options);
+            return this.ReadResource(resourceType,memberName + "." + resourceName, options);
         }
     }
 }

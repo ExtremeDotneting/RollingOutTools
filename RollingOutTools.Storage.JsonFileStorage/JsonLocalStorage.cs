@@ -32,10 +32,10 @@ namespace RollingOutTools.Storage.JsonFileStorage
 
         }
 
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="valuesNamespace">Имя файла.</param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="valuesNamespace">Имя файла.</param>
         public JsonLocalStorage(string valuesNamespace, string dirPath)
         {
             _serializeOpt = new JsonSerializerSettings()
@@ -115,7 +115,7 @@ namespace RollingOutTools.Storage.JsonFileStorage
             return await Task.Run(() =>
             {
                 return (T)_get(key, typeof(T));
-            });
+            }).ConfigureAwait(false);
         }
 
         object _get(string key, Type t)

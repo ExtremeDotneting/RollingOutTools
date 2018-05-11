@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="RollingOutTools.CmdLine" Version="1.1.1" />
+    <PackageReference Include="RollingOutTools.Collections" Version="1.0.0" />
+    <PackageReference Include="RollingOutTools.Common" Version="1.0.0" />
+    <PackageReference Include="RollingOutTools.Net" Version="1.2.0" />
+    <PackageReference Include="RollingOutTools.Storage" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

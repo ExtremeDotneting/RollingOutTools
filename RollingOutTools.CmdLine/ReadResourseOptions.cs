@@ -1,7 +1,7 @@
 ﻿namespace RollingOutTools.CmdLine
 {
     /// <summary>
-    /// Опции для получения ресурсов из CmdLineExtensions.
+    /// Опции для получения ресурсов из thiss.
     /// </summary>
     public class ReadResourseOptions
     {
