@@ -6,5 +6,6 @@ namespace RollingOutTools.Storage
     {
         Task<T> Get<T>(string key);
         Task Set(string key, object value);
+        Task<bool> ContainsKey(string key);
     }
 }

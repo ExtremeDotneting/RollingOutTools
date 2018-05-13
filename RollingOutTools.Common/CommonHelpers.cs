@@ -1,56 +1,22 @@
-﻿using RollingOutTools.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace RollingOutTools.Common
 {
     public static class CommonHelpers
     {
         /// <summary>
-        /// Вернет истину, если пароль соответствует всем правилам.
-        /// </summary>
-        public static bool CheckPass(string pass, out string msg)
-        {
-            if (TextExtensions.IsLatinOrNumber(pass))
-            {
-                msg = "Normal";
-                return true;
-            }
-            else
-            {
-                msg = "Password must contain only a-z,A-Z,0-9 chars.";
-                return false;
-            }
-
-        }
-
-        /// <summary>
-        /// Вернет истину, если ник соответствует всем правилам.
-        /// </summary>
-        public static bool CheckNick(string nick, out string msg)
-        {
-            if (TextExtensions.IsLatinOrNumber(nick))
-            {
-                msg = "Normal";
-                return true;
-            }
-            else
-            {
-                msg = "Login must contain only a-z,A-Z,0-9 chars.";
-                return false;
-            }
-
-        }
-
-        /// <summary>
         /// Глубокое копирование с использованием json серилизации.
         /// Использовать ОЧЕНЬ осторожно, а лучше вообще никогда.
         /// </summary>
         public static T DeepCopy<T>(object obj)
         {
-            return JsonSerializeHelper.Inst.FromJson<T>(
-                JsonSerializeHelper.Inst.ToJson(obj)
+
+            return JsonConvert.DeserializeObject<T>(
+                JsonConvert.SerializeObject(obj)
             );
         }
 
@@ -76,5 +42,74 @@ namespace RollingOutTools.Common
 
             }
         }
+
+        public static void CreateFileIfNotExists(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                string dirPath = Path.GetDirectoryName(filePath);
+                if (!Directory.Exists(dirPath))
+                    Directory.CreateDirectory(dirPath);
+
+                File.CreateText(filePath).Close();
+            }
+        }
+
+        public static void TryCreateFileIfNotExists(string filePath)
+        {
+            try
+            {
+                CreateFileIfNotExists(filePath);
+            }
+            catch { }
+        }
+
+        public static bool TryReadAllText(string filePath, out string readedText, int tryingTimeoutSeconds = 30)
+        {
+            return _TryReadAllText(filePath, out readedText, tryingTimeoutSeconds, DateTime.Now);
+        }
+
+        static bool _TryReadAllText(string filePath, out string readedText, int tryingTimeoutSeconds, DateTime startDT)
+        {
+            readedText = null;
+            try
+            {
+                readedText = File.ReadAllText(filePath);
+                return true;
+            }
+            catch
+            {
+                Thread.Sleep(1000);
+                if ((DateTime.Now - startDT).Seconds < tryingTimeoutSeconds)
+                {
+                    return _TryReadAllText(filePath, out readedText, tryingTimeoutSeconds, startDT);
+                }
+            }
+            return false;
+        }
+
+        public static bool TryWriteAllText(string filePath, string textToWrite, int tryingTimeoutSeconds = 30)
+        {
+            return _TryWriteAllText(filePath, textToWrite, tryingTimeoutSeconds, DateTime.Now);
+        }
+
+        static bool _TryWriteAllText(string filePath, string textToWrite, int tryingTimeoutSeconds, DateTime startDT)
+        {
+            try
+            {
+                File.WriteAllText(filePath, textToWrite);
+                return true;
+            }
+            catch
+            {
+                Thread.Sleep(1000);
+                if ((DateTime.Now - startDT).Seconds < tryingTimeoutSeconds)
+                {
+                    return _TryReadAllText(filePath, out textToWrite, tryingTimeoutSeconds, startDT);
+                }
+            }
+            return false;
+        }
+
     }
 }
