@@ -8,7 +8,7 @@ namespace RollingOutTools.Storage
     /// Вы можете подставить отдельную реализацию на каждой платформе.
     /// Статический класс - просто обертка для простоты использования.
     /// </summary>
-    public static class Storage_HardDrive
+    public static class StorageHardDrive
     {
         static IKeyValueStorage _handler;
 

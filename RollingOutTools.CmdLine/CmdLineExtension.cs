@@ -126,7 +126,7 @@ namespace RollingOutTools.CmdLine
                 if (!string.IsNullOrWhiteSpace(hint))
                     this.WriteLine($"Hint: {hint}", ConsoleColor.Yellow);
 
-                string cachedValueString = Storage_HardDrive.Get<string>(longResName).Result;
+                string cachedValueString = StorageHardDrive.Get<string>(longResName).Result;
 
                 if (typeof(IConvertible).IsAssignableFrom(objectType))
                 {
@@ -213,7 +213,7 @@ namespace RollingOutTools.CmdLine
 
             //Convert again to normal parse json.
             if(options.SaveToCache)
-                Storage_HardDrive.Set(longResName, JsonSerializeHelper.Inst.ToJson(objectType, res));
+                StorageHardDrive.Set(longResName, JsonSerializeHelper.Inst.ToJson(objectType, res));
             return res;
             //
             //Else, will be converted by json.
@@ -250,7 +250,7 @@ namespace RollingOutTools.CmdLine
             else
             {
                 if (options.SaveToCache)
-                    Storage_HardDrive.Set(longResName, val);
+                    StorageHardDrive.Set(longResName, val);
             }
             return Convert.ChangeType(val, objectType);
             //

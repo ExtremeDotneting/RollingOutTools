@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="RollingOutTools.Common" Version="1.0.7" />
-    <PackageReference Include="RollingOutTools.Storage" Version="1.0.1" />
+    <PackageReference Include="RollingOutTools.Storage" Version="1.0.2" />
   </ItemGroup>
 
 </Project>

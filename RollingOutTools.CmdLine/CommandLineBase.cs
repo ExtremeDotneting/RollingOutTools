@@ -43,11 +43,11 @@ namespace RollingOutTools.CmdLine
         {
             get
             {
-                return Storage_HardDrive.Get<string>(this.GetType().Name+".last_cmd").Result;
+                return StorageHardDrive.Get<string>(this.GetType().Name+".last_cmd").Result;
             }
             set
             {
-                Storage_HardDrive.Set(this.GetType().Name + ".last_cmd", value);
+                StorageHardDrive.Set(this.GetType().Name + ".last_cmd", value);
             }
         }
 
