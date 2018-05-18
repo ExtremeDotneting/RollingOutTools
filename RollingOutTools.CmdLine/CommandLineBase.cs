@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using RollingOutTools.Common;
 using RollingOutTools.Storage;
 
 namespace RollingOutTools.CmdLine
@@ -77,6 +78,9 @@ namespace RollingOutTools.CmdLine
                 CmdInfoAttribute attr = item.GetCustomAttribute(typeof(CmdInfoAttribute)) as CmdInfoAttribute;
                 if (attr != null && attr.CmdName != "help")
                 {
+                    //TODO: Remove attribute crunch.
+                    attr.CmdName = attr?.CmdName ?? TextExtensions.ToUnderscoreCase(item.Name);
+
                     string newStr = "\t" + attr.CmdName + " - "+ item.Name + "(";
                     bool isFirst = true;
 
@@ -241,7 +245,12 @@ namespace RollingOutTools.CmdLine
                 CmdInfoAttribute attr = item.GetCustomAttribute(typeof(CmdInfoAttribute)) as CmdInfoAttribute;
                 if (attr != null)
                 {
-                    cmdNameAndMethod.Add(attr.CmdName, item);
+                    //TODO: Remove attribute crunch.
+                    attr.CmdName = attr?.CmdName ?? TextExtensions.ToUnderscoreCase(item.Name);
+                    cmdNameAndMethod.Add(
+                        attr.CmdName,
+                        item)
+                        ;
                 }
             }
             return cmdNameAndMethod;

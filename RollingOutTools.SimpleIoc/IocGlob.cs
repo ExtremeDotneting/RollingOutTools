@@ -128,7 +128,7 @@ namespace RollingOutTools.SimpleIoc
         }
 
         /// <summary>
-        /// Search assingnable types in app domain  and return first finded type or throw exception.
+        /// Search assignable types in app domain  and return first finded type or throw exception.
         /// </summary>
         /// <param name="assemblyesNames">If null, it will search in current app domain assemblies.</param>
         /// <returns></returns>
