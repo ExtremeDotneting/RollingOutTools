@@ -40,9 +40,7 @@ namespace RollingOutTools.CmdLine
                 consoleHandler ?? new DefaultConsoleHandler()
                 );
         }
-        #endregion
-
-       
+        #endregion       
 
         public IConsoleHandler ConsoleHandler { get; private set; }
 
@@ -204,7 +202,7 @@ namespace RollingOutTools.CmdLine
 
                 
 
-                this.WriteLine("Accept changes? Press y/n (y): ", ConsoleColor.Yellow);
+                this.Write("Accept changes? Press y/n (y): ", ConsoleColor.Yellow);
                 isAccept = this.ReadLine().Trim().StartsWith("n");
             } while (isAccept);
              
@@ -230,7 +228,7 @@ namespace RollingOutTools.CmdLine
                 cachedValueInHint = cachedValueInHint.Substring(0, 80) + "... ";
             }
 
-            this.WriteLine(
+            this.Write(
                 $"Input ({cachedValueInHint}): ",
                 ConsoleColor.Yellow
                 );
@@ -252,7 +250,21 @@ namespace RollingOutTools.CmdLine
                 if (options.SaveToCache)
                     StorageHardDrive.Set(longResName, val);
             }
-            return Convert.ChangeType(val, objectType);
+
+
+            object res=null;
+            if (objectType == typeof(bool) || objectType == typeof(bool?))
+            {
+                val = val.Trim();
+                if (val == "y")
+                    res = true;
+                if (val == "n")
+                    res = false;
+
+            }
+            if (res == null)
+                res = Convert.ChangeType(val, objectType);
+            return res;
             //
             //If IConvertible
         }

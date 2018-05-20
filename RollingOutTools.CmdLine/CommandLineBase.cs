@@ -15,7 +15,7 @@ namespace RollingOutTools.CmdLine
     /// </summary>
     public class CommandLineBase
     {
-        CmdLineExtension _cmdLineExtension;
+        public CmdLineExtension Cmd { get; private set; }
         protected readonly ICmdSwitcher CurrentCmdSwitcher;
         bool _isAutorunEnabled = false;
         bool _isInRun = true;
@@ -54,7 +54,7 @@ namespace RollingOutTools.CmdLine
 
         public CommandLineBase(ICmdSwitcher cmdSwitcher, CmdLineExtension cmdLineExtension=null)
         {
-            _cmdLineExtension = cmdLineExtension ?? CmdLineExtension.Inst;
+            Cmd = cmdLineExtension ?? CmdLineExtension.Inst;
             CurrentCmdSwitcher = cmdSwitcher;
             CmdNameAndMethod = CreateReflectionDict();
         }
@@ -62,7 +62,7 @@ namespace RollingOutTools.CmdLine
 
         public virtual void OnStart()
         {
-            _cmdLineExtension.WriteLine(
+            Cmd.WriteLine(
                 $"You have been opened command line '{this.GetType().Name}'. Write 'help' to open commands list.",
                 ConsoleColor.Magenta
                 );
@@ -104,21 +104,21 @@ namespace RollingOutTools.CmdLine
 
                 
             }
-            _cmdLineExtension.Write(res.ToString());
+            Cmd.Write(res.ToString());
         }
 
         public virtual void OnEveryLoop()
         {
-            _cmdLineExtension.WriteLine(
+            Cmd.Write(
                 $"cmd ( { LastCmdName ?? ""} ) : ",
                 ConsoleColor.DarkGreen
                 );
 
-            string cmdName = _cmdLineExtension.ReadLine();
+            string cmdName = Cmd.ReadLine();
             ExecuteCmd(cmdName);
 
 
-            _cmdLineExtension.WriteLine();
+            Cmd.WriteLine();
 
         }
 
@@ -177,20 +177,20 @@ namespace RollingOutTools.CmdLine
 
                 else
                 {
-                    _cmdLineExtension.WriteLine("Command not found.");
+                    Cmd.WriteLine("Command not found.");
                 }
             }
             catch (Exception ex)
             {
-                _cmdLineExtension.WriteLine("Executing command throwed exception: " + ex.ToString(), ConsoleColor.DarkRed);
+                Cmd.WriteLine("Executing command throwed exception: " + ex.ToString(), ConsoleColor.DarkRed);
                 //ApiException apiEx = ExceptionsHelper.FindInnerExceptionInAggregateException<ApiException>(ex);
                 //if (apiEx!=null)
                 //{
                 //    var apiErr = apiEx.GetApiError();
                 //    HandleApiError(apiErr);
                 //}
-                _cmdLineExtension.WriteLine("\nWant to ignore it? Press y/n (y): ", ConsoleColor.DarkRed);
-                var consoleText = _cmdLineExtension.ReadLine();
+                Cmd.Write("\nWant to ignore it? Press y/n (y): ", ConsoleColor.DarkRed);
+                var consoleText = Cmd.ReadLine();
                 if (consoleText.Trim()=="")
                 {
                     //throw;
@@ -206,16 +206,6 @@ namespace RollingOutTools.CmdLine
             }
         }
 
-        /// <summary>
-        /// Костиль для отслеживания нужных мне исключений. Ведь я не могу их нормально получить из таска.
-        /// </summary>
-        /// <param name="apiErr"></param>
-        //void HandleApiError(ApiError apiErr)
-        //{            
-        //    var apiErrStr = JsonSerializeHelper.Inst.ToJson(apiErr, true);
-        //    this.WriteLine("\nApi error: " + apiErrStr, ConsoleColor.DarkRed);
-        //}
-                
         /// <summary>
         /// НЕ ПЕРЕДАВАТЬ НИКАКИХ ПАРАМЕТРОВ. 
         /// </summary>
@@ -275,7 +265,7 @@ namespace RollingOutTools.CmdLine
             options = options ?? new ReadResourseOptions();
             options.UseAutoread = _isAutorunEnabled;
 
-            return this.ReadResource(resourceType,memberName + "." + resourceName, options);
+            return Cmd.ReadResource(resourceType,memberName + "." + resourceName, options);
         }
     }
 }
