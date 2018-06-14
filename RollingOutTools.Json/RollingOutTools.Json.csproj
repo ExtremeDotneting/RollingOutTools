@@ -11,8 +11,4 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="XCOPY &quot;$(MSBuildThisFileDirectory)bin\$(Configuration)\*.nupkg&quot; &quot;E:\cf\projects\LocalNugetDir&quot; /s  /i  /Y" />
-  </Target>
 </Project>
