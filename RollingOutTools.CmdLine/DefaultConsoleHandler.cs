@@ -18,7 +18,7 @@ namespace RollingOutTools.CmdLine
                         jsonEditorFilePath,
                         jsonPrototypeString
                         );
-                Process editorProcess = Process.Start(Environment.CurrentDirectory + "\\" + jsonEditorFilePath);
+                Process editorProcess = Process.Start(jsonEditorFilePath);
                 editorProcess.WaitForExit();
                 return File.ReadAllText(jsonEditorFilePath);
             }
