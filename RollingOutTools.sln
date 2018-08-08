@@ -25,6 +25,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RollingOutTools.Collections
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollingOutTools.CmdLine.DroidAndBridge", "RollingOutTools.CmdLine.DroidAndBridge\RollingOutTools.CmdLine.DroidAndBridge.csproj", "{63A042DE-FE46-4C3A-BF99-1CC26A42CC45}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RollingOutTools.PureApi.AspNetCore.Json", "RollingOutTools.PureApi.AspNetCore.Json\RollingOutTools.PureApi.AspNetCore.Json.csproj", "{F86AE09D-56D7-48DB-A5E7-65412834F405}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RollingOutTools.PureApi.AspNetCore", "RollingOutTools.PureApi.AspNetCore\RollingOutTools.PureApi.AspNetCore.csproj", "{BCB28D3C-3367-44DC-B6BB-78DEBDE122AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +79,14 @@ Global
 		{63A042DE-FE46-4C3A-BF99-1CC26A42CC45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63A042DE-FE46-4C3A-BF99-1CC26A42CC45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63A042DE-FE46-4C3A-BF99-1CC26A42CC45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F86AE09D-56D7-48DB-A5E7-65412834F405}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F86AE09D-56D7-48DB-A5E7-65412834F405}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F86AE09D-56D7-48DB-A5E7-65412834F405}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F86AE09D-56D7-48DB-A5E7-65412834F405}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCB28D3C-3367-44DC-B6BB-78DEBDE122AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCB28D3C-3367-44DC-B6BB-78DEBDE122AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCB28D3C-3367-44DC-B6BB-78DEBDE122AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCB28D3C-3367-44DC-B6BB-78DEBDE122AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
