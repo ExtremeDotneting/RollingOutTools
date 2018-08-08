@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RollingOutTools.Common" Version="1.0.7" />
+    <PackageReference Include="RollingOutTools.Common" Version="1.0.8" />
     <PackageReference Include="RollingOutTools.Json" Version="1.0.0" />
-    <PackageReference Include="RollingOutTools.Storage" Version="1.0.2" />
+    <PackageReference Include="RollingOutTools.Storage" Version="1.0.3" />
   </ItemGroup>
 
 </Project>
