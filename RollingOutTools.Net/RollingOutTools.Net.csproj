@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RollingOutTools.Collections" Version="1.0.0" />
+    <ProjectReference Include="..\RollingOutTools.Collections\RollingOutTools.Collections.csproj" />
   </ItemGroup>
 
 </Project>
