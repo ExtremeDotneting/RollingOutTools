@@ -115,7 +115,7 @@ namespace RollingOutTools.Common
 
         /// <summary> 
         /// </summary>
-        /// <param name="assembly">Something like "RollingOutTools.CmdLine.DroidAndBridge"</param>
+        /// <param name="assembly">Something like RollingOutTools.CmdLine.DroidAndBridge</param>
         /// <param name="resourceName">Something like "console_script.js"</param>
         /// <returns></returns>
         public static async Task<string> ReadEmbededResourceText(Assembly assembly, string resourceName)
@@ -127,6 +127,11 @@ namespace RollingOutTools.Common
             }
         }
 
+        /// <summary> 
+        /// </summary>
+        /// <param name="assembly">Something like RollingOutTools.CmdLine.DroidAndBridge</param>
+        /// <param name="resourceName">Something like "console_script.js"</param>
+        /// <returns></returns>
         public static bool IsEmbededResourceExists(Assembly assembly, string resourceName)
         {
             return assembly.GetManifestResourceNames().Contains(resourceName);
