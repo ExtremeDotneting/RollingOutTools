@@ -3,15 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="RollingOutTools.Common" Version="1.0.8" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RollingOutTools.Common\RollingOutTools.Common.csproj" />
     <ProjectReference Include="..\RollingOutTools.Storage\RollingOutTools.Storage.csproj" />
   </ItemGroup>
 
