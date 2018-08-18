@@ -137,12 +137,20 @@ namespace RollingOutTools.Common
             return assembly.GetManifestResourceNames().Contains(resourceName);
         }
 
+        static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
+        {
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        };
         public static string ToJsonStr(this object obj)
         {
             return JsonConvert.SerializeObject(
                obj,
-               Formatting.Indented
+               Formatting.Indented,
+               jsonSerializerSettings
                );
+            
         }
     }
 }

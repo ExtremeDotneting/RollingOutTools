@@ -20,7 +20,7 @@ namespace RollingOutTools.Json
         {
             DefaultValueHandling = DefaultValueHandling.Ignore,
             NullValueHandling = NullValueHandling.Ignore,
-
+            ReferenceLoopHandling= ReferenceLoopHandling.Ignore
         };
         static JsonSerializerSettings settingsIncludeDefaults = new JsonSerializerSettings( );
         static IContractResolver defCintractResolver=new CamelCasePropertyNamesContractResolver();
