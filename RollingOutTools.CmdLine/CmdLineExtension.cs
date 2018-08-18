@@ -197,10 +197,7 @@ namespace RollingOutTools.CmdLine
                 );
             do
             {
-                editedJson = ConsoleHandler.ReadJson(jsonPrototypeString);
-
-
-                
+                editedJson = ConsoleHandler.ReadJson(jsonPrototypeString);               
 
                 this.Write("Accept changes? Press y/n (y): ", ConsoleColor.Yellow);
                 isAccept = this.ReadLine().Trim().StartsWith("n");

@@ -136,5 +136,13 @@ namespace RollingOutTools.Common
         {
             return assembly.GetManifestResourceNames().Contains(resourceName);
         }
+
+        public static string ToJsonStr(this object obj)
+        {
+            return JsonConvert.SerializeObject(
+               obj,
+               Formatting.Indented
+               );
+        }
     }
 }

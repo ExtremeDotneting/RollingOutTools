@@ -6,8 +6,15 @@ using System.Text;
 
 namespace RollingOutTools.CmdLine
 {
-    public class DefaultConsoleHandler : IConsoleHandler
-    {       
+    public class SimplestConsoleHandler : IConsoleHandler
+    {
+        Action<string> _writeAction;
+
+        public SimplestConsoleHandler(Action<string> writeAction)
+        {
+            _writeAction = writeAction;
+        }
+
         public string ReadJson(string jsonPrototypeString)
         {
             return SharedConsoleMethods.ReadJson(jsonPrototypeString, this);
@@ -22,31 +29,27 @@ namespace RollingOutTools.CmdLine
         {
             if (consoleColor == null)
             {
-                Console.Write(str);
+                _writeAction.Invoke(str);
                 return;
             }
-            var current = Console.ForegroundColor;
-            Console.ForegroundColor = consoleColor.Value;
-            Console.Write(str);
-            Console.ForegroundColor = current;
+
+            _writeAction.Invoke(str);
         }
 
         public void WriteLine(string str, ConsoleColor? consoleColor)
         {
             if (consoleColor==null)
             {
-                Console.WriteLine(str);
+                _writeAction.Invoke(str+"\n");
                 return;
             }
-            var current = Console.ForegroundColor;
-            Console.ForegroundColor = consoleColor.Value;
-            Console.WriteLine(str);
-            Console.ForegroundColor = current;
+
+            _writeAction.Invoke(str+"\n");
         }
 
         public void WriteLine()
         {
-            Console.WriteLine();
+            _writeAction.Invoke("\n");
         }
     }
 }
