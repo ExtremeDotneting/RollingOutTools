@@ -46,6 +46,8 @@ namespace RollingOutTools.Storage
         /// </summary>
         public static Task<bool> ContainsKey(string key) => Handler.ContainsKey(key);
 
+        public static Task ClearAll() => Handler.ClearAll();
+
         /// <summary>
         /// Manual set handler. Use for fast initialization.
         /// </summary>

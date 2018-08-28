@@ -107,8 +107,20 @@ namespace RollingOutTools.Storage.JsonFileStorage
         /// </summary>
         public async Task<bool> ContainsKey(string key)
         {
-            object value = await Get<object>(key);
-            return value == null;
+            lock (Locker)
+            {
+                _LoadStorageState();
+                return _storageDict.ContainsKey(key);
+            }
+        }
+
+        public Task ClearAll()
+        {
+            lock (Locker)
+            {
+                _SaveStorageState("{}");
+            }
+            return Task.FromResult<object>(null);
         }
 
         object _Get(string key, Type t)
@@ -126,13 +138,8 @@ namespace RollingOutTools.Storage.JsonFileStorage
                         return null;
                 }
 
-
                 string serializedStr = JsonConvert.SerializeObject(_storageDict[key]);
-                object res = JsonConvert.DeserializeObject(serializedStr, t);
-
-                
-
-
+                object res = JsonConvert.DeserializeObject(serializedStr, t);              
                 return res;
             }
 
