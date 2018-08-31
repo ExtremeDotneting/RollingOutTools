@@ -31,3 +31,4 @@ _ReSharper*/
 #Nuget packages folder
 packages/
 /copy_to_nuget_dir.cmd
+/publish_to_nugetorg.cmd

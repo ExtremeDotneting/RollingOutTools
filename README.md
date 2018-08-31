@@ -1,7 +1,7 @@
 #  RollingOutTools - all my coolest libraries
 <br />Here you can see solution with may libraries that i use in own projects.
 <br />This assemblies is unified and i can make it opensource.
-<br />Now i use it via nuget local folder, maybe some day i will upload current libraries into nuget.org .
+<br />All assemblies here: https://www.nuget.org/profiles/KogerCoder
 <br />
 <br />Why "rolling out tools"? Its name of my team, where we share expirience and just communicate.
 <br />
