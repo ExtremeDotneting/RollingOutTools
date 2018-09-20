@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace RollingOutTools.ReflectionVisit
@@ -6,18 +7,22 @@ namespace RollingOutTools.ReflectionVisit
     /// <summary>
     /// Класс для выполнения метода.
     /// </summary>
-    public interface IMethod_ReflectionMap
+    public interface IReflectionMapMethod
     {
+        string Description { get; }
+
+        string DisplayName { get; }
+
+        string RealName { get; }
+
         /// <summary>
         /// Типы входных параметров по порядку.
         /// </summary>
-        Parameter[] Parameters { get;  }
+        IReadOnlyCollection<Parameter> Parameters { get;}
 
         Type ReturnType { get; }
 
         MethodKind Kind { get;  }
-
-        bool IsAsync { get; }
 
         /// <summary>
         /// Return result from called method without any manipulations on result.

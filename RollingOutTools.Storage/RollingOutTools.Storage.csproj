@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RollingOutTools.SimpleIoc" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="netstandard">
       <HintPath>C:\Program Files (x86)\Microsoft SDKs\NuGetPackagesFallback\netstandard.library\2.0.1\build\netstandard2.0\ref\netstandard.dll</HintPath>
     </Reference>

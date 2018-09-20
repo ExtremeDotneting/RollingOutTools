@@ -10,44 +10,69 @@ namespace RollingOutTools.ReflectionVisit
 
     public class ReflectionMap
     {
-        ReflectionMap(string splitter)
+        /// <summary>
+        /// Создает ReflectionMap для типа inspectedType. 
+        /// Не забудьте, что свойства и методы должны быть отмечены одним из атрибутов.
+        /// <param name="inspectedType">Тип, методы экземпляра которого будут вызваны через ReflectionMap. 
+        /// Это может быть как класс так и его интерфейс</param>
+        /// <param name="prefixName">Строка, которая будет добавлена вначале всех ключей в словаре методов.</param>
+        /// <param name="allowIncludedOnjects">Если истина, то свойства, 
+        /// помеченные через IncludedObjReflectionMapAttribute будут исследованы.</param>
+        /// </summary>
+        public ReflectionMap(Type inspectedType,string splitter= ".",
+            bool allowIncludedOnjects=false,string prefixName=null,bool underscoreNotation=false)
         {
+            _allowIncludedOnjects = allowIncludedOnjects;
             _splitter = splitter;
+            _underscoreNotationEnabled = underscoreNotation;
+            _underscoreNotationEnabled = underscoreNotation;
+
+
+            InspectedType = inspectedType;
+            Func<object, object> first_funcToGetLocalInstanceFromGlobal = (globalInst) =>
+            {
+                return globalInst;
+            };
+            string prefix = (prefixName == null) ? "" : (prefixName + splitter);
+
+            //Ищем методы
+            InspectMetods(
+                prefix, "",
+                inspectedType,
+                first_funcToGetLocalInstanceFromGlobal
+                );
+
+            //Ищем простые свойства
+            InspectSimpleProps(
+                prefix, "",
+                inspectedType,
+                first_funcToGetLocalInstanceFromGlobal
+                );
+
+            //Ищем свойства-категории
+            InspectIncludedObjProps(
+                prefix, "",
+                inspectedType,
+                first_funcToGetLocalInstanceFromGlobal
+                );
         }
 
+        #region Private fields
+        bool _allowIncludedOnjects;
+
         string _splitter;
+
+        bool _underscoreNotationEnabled;
+        
+        Dictionary<string, IReflectionMapMethod> _longNameAndMethod = new Dictionary<string, IReflectionMapMethod>();
+        #endregion
+
+        public IReadOnlyDictionary<string, IReflectionMapMethod> LongNameAndMethod =>_longNameAndMethod;
 
         /// <summary>
         /// Тип по которому был построен ReflectionMap.
         /// </summary>
         public Type InspectedType { get; private set; }
-
-        Dictionary<string, IMethod_ReflectionMap> _longNameAndMethod = new Dictionary<string, IMethod_ReflectionMap>();
-        Dictionary<string, IInfo_ReflectionMap> _longNameAndInfo = new Dictionary<string, IInfo_ReflectionMap>();
-
-        public Dictionary<string, IMethod_ReflectionMap> LongNameAndMethod => _longNameAndMethod;
-        public Dictionary<string, IInfo_ReflectionMap> LongNameAndInfo => _longNameAndInfo;
-
-
-        /// <summary>
-        /// Возвращает объект по типу MethodInfo в стандартной рефлексии, но без лишних методов и с существенным отличием.
-        /// ВЫ ДОЛЖНЫ ПЕРЕДАВАТЬ ИМЕННО InspectedType из ReflectionMap при вызове методов, а остальной путь к свойству будет проложен автоматически.
-        /// </summary>
-        /// <param name="longNameOfPropOrMethod">Имя свойства по типу 'user.get'. Обратите внимание, 
-        /// что для именования теперь будет использоваться underscope или то имя, что вы указали в атрибуте.
-        /// Обязательно вручную указывайте разные имена для методов с перегрузкой.</param>
-        public IMethod_ReflectionMap GetMethod(string longNameOfPropOrMethod)
-        {
-            return _longNameAndMethod[longNameOfPropOrMethod];
-        }
-
-        /// <summary>
-        /// Возвращает информацию о свойстве или методе из списка.
-        /// </summary>
-        public IInfo_ReflectionMap GetInfo(string longNameOfPropOrMethod)
-        {
-            return _longNameAndInfo[longNameOfPropOrMethod];
-        }
 
         /// <summary>
         /// Кроме как для удобного просмотра карты всех апи этот метод ни для чего не служит.
@@ -55,14 +80,15 @@ namespace RollingOutTools.ReflectionVisit
         public string AsString()
         {
             StringBuilder res = new StringBuilder();
-            foreach (var item in _longNameAndInfo)
+            foreach (var item in _longNameAndMethod)
             {
                 string newStr = item.Key;
+                var dictVal = item.Value;
                 if (_longNameAndMethod.ContainsKey(item.Key))
                 {
                     newStr += "(";
                     bool isFirst = true;
-                    foreach (var parameter in _longNameAndMethod[item.Key].Parameters)
+                    foreach (var parameter in dictVal.Parameters)
                     {
                         if (!isFirst)
                         {
@@ -70,8 +96,8 @@ namespace RollingOutTools.ReflectionVisit
 
                         }
                         isFirst = false;
-                        newStr += parameter.ParamType.Name + "  " 
-                            + TextExtensions.ToUnderscoreCase(parameter.ParamName);
+                        newStr += parameter.ParamType.Name + "  "
+                            + ToCurrentNotation(parameter.ParamName);
                     }
                     newStr += ")";
                 }
@@ -86,72 +112,25 @@ namespace RollingOutTools.ReflectionVisit
         }
 
         /// <summary>
-        /// Создает ReflectionMap для типа inspectedType. 
-        /// После этого вы можете использовать этот объект для вызовов методов класса при помощи выражений типа 'user.get'.
-        /// Не забудьте, что свойства и методы должны быть помечены одним из атрибутов.
-        /// Кстати, вы всегда должны полностью указывать путь к методу или подсвойтву, вы не можете получить часть ReflevtionMap. 
-        /// Это было сделано осознанно, такой подход больше схож с настоящим RestApi, где вы не можете получить часть апи 
-        /// в виде объекта записанного в свойство (и тут не можете).
-        /// </summary>
-        public static ReflectionMap CreateMap(Type inspectedType,string splitter= "/")
-        {
-            var res = new ReflectionMap(splitter);
-            res.InspectedType = inspectedType;
-            Func<object, object> first_funcToGetLocalInstanceFromGlobal = (globalInst) =>
-            {
-                return globalInst;
-            };
-
-            var classInfoAttr= inspectedType.GetCustomAttribute<ClassInfo_ReflectionMapAttribute>();
-            string prefix = (classInfoAttr==null || classInfoAttr.Prefix==null) ? "" : (classInfoAttr.Prefix + splitter) ;
-
-            //Ищем методы
-            res.inspectMetods(
-                prefix, "",
-                inspectedType,
-                first_funcToGetLocalInstanceFromGlobal
-                );
-
-            //Ищем простые свойства
-            res.inspectSimpleProps(
-                prefix, "",
-                inspectedType,
-                first_funcToGetLocalInstanceFromGlobal
-                );
-
-            //Ищем свойства-категории
-            res.inspectCategoryProps(
-                prefix, "",
-                inspectedType,
-                first_funcToGetLocalInstanceFromGlobal
-                );
-            return res;
-        }
-
-        /// <summary>
         /// Ищем методы.
         /// </summary>
         /// <param name="t">Исследуемый тип, не путать с InspectedType, ведь с погружением в его поля это будет их тип, соответственно.</param>
         /// <param name="funcToGetLocalInstanceFromGlobal">Делегат для получения объекта с типом t из InspectedType.</param>
-        void inspectMetods(string prefix, string realNamePrefix, Type t, Func<object, object> funcToGetLocalInstanceFromGlobal)
+        void InspectMetods(string prefix, string realNamePrefix, Type t, Func<object, object> funcToGetLocalInstanceFromGlobal)
         {
-            var methodInfoList = getAllMethods(t);
+            var methodInfoList = GetAllMethods(t);
 
             foreach (var item in methodInfoList)
             {
-                var attr = item.GetCustomAttribute(typeof(Method_ReflectionMapAttribute)) as Method_ReflectionMapAttribute;
+                var attr = item.GetCustomAttribute(typeof(MethodReflectionMapAttribute)) as MethodReflectionMapAttribute;
                 if (attr != null)
                 {
-                    var newInfo = new Info_ReflectionMap()
+                    var newMethod = new ReflectionMapMethod()
                     {
-                        DisplayName = prefix + (attr.DisplayName ?? TextExtensions.ToUnderscoreCase(item.Name)),
+                        DisplayName = prefix + (attr.DisplayName ?? ToCurrentNotation(item.Name)),
                         RealName = realNamePrefix + item.Name,
                         Description = attr.Description,
-                    };
-
-                    var newMethod = new Method_ReflectionMap()
-                    {
-                        Parameters = parameterInfoArrayToParamsArray(item.GetParameters()),
+                        Parameters = ParameterInfoArrayToParamsArray(item.GetParameters()),
                         ReturnType=item.ReturnType
                     };
                     newMethod.InvokeAction = (globalInst, parameters) =>
@@ -159,16 +138,9 @@ namespace RollingOutTools.ReflectionVisit
                         var locInst = funcToGetLocalInstanceFromGlobal(globalInst);
                         return item.Invoke(locInst, parameters);
                     };
-                    checkIfTaskAndDoDirtWork(item, newMethod);
-
-
-                    _longNameAndInfo.Add(
-                       newInfo.DisplayName,
-                       newInfo
-                       );
 
                     _longNameAndMethod.Add(
-                        newInfo.DisplayName,
+                        newMethod.DisplayName,
                         newMethod
                         );
                 }
@@ -176,7 +148,7 @@ namespace RollingOutTools.ReflectionVisit
 
         }
 
-        Parameter[] parameterInfoArrayToParamsArray(ParameterInfo[] arr)
+        Parameter[] ParameterInfoArrayToParamsArray(ParameterInfo[] arr)
         {
             var resArr = new Parameter[arr.Length];
             for(int i = 0; i < arr.Length; i++)
@@ -193,7 +165,7 @@ namespace RollingOutTools.ReflectionVisit
         /// <summary>
         /// Default reflection method don`t return methods of interfaces, that type implement. This method can do it.
         /// </summary>
-        List<MethodInfo> getAllMethods(Type t)
+        List<MethodInfo> GetAllMethods(Type t)
         {
 
             List<MethodInfo> methodInfoList = new List<MethodInfo>();
@@ -212,25 +184,20 @@ namespace RollingOutTools.ReflectionVisit
         /// </summary>
         /// <param name="t">Исследуемый тип, не путать с InspectedType, ведь с погружением в его поля это будет их тип, соответственно.</param>
         /// <param name="funcToGetLocalInstanceFromGlobal">Делегат для получения объекта с типом t из InspectedType.</param>
-        void inspectSimpleProps(string prefix, string realNamePrefix, Type t, Func<object, object> funcToGetLocalInstanceFromGlobal)
+        void InspectSimpleProps(string prefix, string realNamePrefix, Type t, Func<object, object> funcToGetLocalInstanceFromGlobal)
         {
-            //Dictionary<string, MethodInfo_ReflectionMap> res =new Dictionary<string, MethodInfo_ReflectionMap>();
             foreach (var item in t.GetProperties())
             {
-                var attr = item.GetCustomAttribute(typeof(SimpleProp_ReflectionMapAttribute)) as SimpleProp_ReflectionMapAttribute;
+                var attr = item.GetCustomAttribute(typeof(SimplePropReflectionMapAttribute)) as SimplePropReflectionMapAttribute;
                 if (attr != null)
                 {
                     if (attr.CanGet && item.CanRead)
                     {
-                        var newInfo = new Info_ReflectionMap()
+                        var newMethod = new ReflectionMapMethod()
                         {
-                            DisplayName = prefix + ("get_" + (attr.DisplayName ?? TextExtensions.ToUnderscoreCase(item.Name))),
-                            RealName = realNamePrefix  + item.Name,
-                            Description = attr.Description
-                        };
-
-                        var newMethod = new Method_ReflectionMap()
-                        {
+                            DisplayName = prefix + (NotationGetPrefix() + (attr.DisplayName ?? ToCurrentNotation(item.Name))),
+                            RealName = realNamePrefix + item.Name,
+                            Description = attr.Description,
                             Parameters = new Parameter[] { },
                             ReturnType = item.PropertyType,
                             Kind = MethodKind.PropertyGetter
@@ -242,37 +209,26 @@ namespace RollingOutTools.ReflectionVisit
                             var locInst = funcToGetLocalInstanceFromGlobal(globalInst);
                             return getter.Invoke(locInst, parameters);
                         };
-                        checkIfTaskAndDoDirtWork(getter, newMethod);
-
-                        _longNameAndInfo.Add(
-                            newInfo.DisplayName,
-                            newInfo
-                        );
-
 
                         _longNameAndMethod.Add(
-                            newInfo.DisplayName,
+                            newMethod.DisplayName,
                             newMethod
                             );
                     }
 
                     if (attr.CanSet && item.CanWrite)
                     {
-                        var newInfo = new Info_ReflectionMap()
-                        {
-                            DisplayName = prefix + ("set_" + (attr.DisplayName ?? TextExtensions.ToUnderscoreCase(item.Name))),
-                            RealName =realNamePrefix + "Set"+item.Name,
-                            Description = attr.Description
-                        };
-
                         var param = new Parameter
                         {
                             ParamType = item.PropertyType,
                             ParamName = "val"
                         };
 
-                        var newMethod = new Method_ReflectionMap()
+                        var newMethod = new ReflectionMapMethod()
                         {
+                            DisplayName = prefix + (NotationGetPrefix() + (attr.DisplayName ?? ToCurrentNotation(item.Name))),
+                            RealName = realNamePrefix + "Set" + item.Name,
+                            Description = attr.Description,
                             Parameters = new Parameter[] { param },
                             ReturnType = typeof(void),
                             Kind = MethodKind.PropertySetter
@@ -285,16 +241,9 @@ namespace RollingOutTools.ReflectionVisit
                             var locInst = funcToGetLocalInstanceFromGlobal(globalInst);
                             return setter.Invoke(locInst, parameters);
                         };
-                        checkIfTaskAndDoDirtWork(setter, newMethod);
-
-                        _longNameAndInfo.Add(
-                            newInfo.DisplayName,
-                            newInfo
-                            );
-
 
                         _longNameAndMethod.Add(
-                            newInfo.DisplayName,
+                            newMethod.DisplayName,
                             newMethod
                             );
                     }
@@ -308,24 +257,21 @@ namespace RollingOutTools.ReflectionVisit
         /// </summary>
         /// <param name="t">Исследуемый тип, не путать с InspectedType, ведь с погружением в его поля это будет их тип, соответственно.</param>
         /// <param name="funcToGetLocalInstanceFromGlobal">Делегат для получения объекта с типом t из InspectedType.</param>
-        void inspectCategoryProps(string prefix, string realNamePrefix, Type t, Func<object, object> funcToGetLocalInstanceFromGlobal)
+        void InspectIncludedObjProps(string prefix, string realNamePrefix, Type t, Func<object, object> funcToGetLocalInstanceFromGlobal)
         {
+            if (!_allowIncludedOnjects)
+                return;
             foreach (var item in t.GetProperties())
             {
-                var attr = item.GetCustomAttribute(typeof(CategoryProp_ReflectionMapAttribute)) as CategoryProp_ReflectionMapAttribute;
+                var attr = item.GetCustomAttribute(typeof(IncludedObjReflectionMapAttribute)) as IncludedObjReflectionMapAttribute;
                 if (attr != null)
                 {
-                    var newInfo = new Info_ReflectionMap()
-                    {
-                        DisplayName = prefix + (attr.DisplayName ?? TextExtensions.ToUnderscoreCase(item.Name)),
-                        RealName= realNamePrefix+ item.Name,
-                        Description = attr.Description
-                    };
-
-                    _longNameAndInfo.Add(
-                        prefix + newInfo.DisplayName,
-                        newInfo
-                        );
+                    var displayName = prefix + (attr.DisplayName ?? ToCurrentNotation(item.Name));
+                    var realName = realNamePrefix + item.Name;
+                    //_longNameAndInfo.Add(
+                    //    prefix + newInfo.DisplayName,
+                    //    newInfo
+                    //    );
 
                     var categoryGetter=item.GetMethod;
                     Func<object, object> new_funcToGetLocalInstanceFromGlobal = (globalInst) =>
@@ -333,27 +279,25 @@ namespace RollingOutTools.ReflectionVisit
                         var parentInst = funcToGetLocalInstanceFromGlobal(globalInst);
                         var res=categoryGetter.Invoke(parentInst, new object[0]);
                         return res;
-
-
                     };
 
-                    var newPrefix = prefix + newInfo.DisplayName + _splitter;
-                    var newRealNamePrefix = realNamePrefix +newInfo.RealName+".";
-                    inspectMetods(
+                    var newPrefix =  displayName + _splitter;
+                    var newRealNamePrefix = realNamePrefix +realName+".";
+                    InspectMetods(
                         newPrefix,
                         newRealNamePrefix,
                         item.PropertyType,
                         new_funcToGetLocalInstanceFromGlobal
                         );
 
-                    inspectSimpleProps(
+                    InspectSimpleProps(
                         newPrefix,
                         newRealNamePrefix,
                         item.PropertyType,
                         new_funcToGetLocalInstanceFromGlobal
                         );
 
-                    inspectCategoryProps(
+                    InspectIncludedObjProps(
                         newPrefix,
                         newRealNamePrefix,
                         item.PropertyType,
@@ -363,13 +307,25 @@ namespace RollingOutTools.ReflectionVisit
             }
         }
 
-        void checkIfTaskAndDoDirtWork(MethodInfo mi, Method_ReflectionMap newMethod)
+        string NotationGetPrefix()
         {
-            if (typeof(Task).IsAssignableFrom(mi.ReturnType))
-            {
-                newMethod.IsAsync = true;
-                newMethod.ReflectionToGetResultFromGenericTask = mi.ReturnType.GetProperty("Result").GetMethod;
-            }
+            if (_underscoreNotationEnabled)
+                return "get_";
+            return "Get";
+        }
+
+        string NotationSetPrefix()
+        {
+            if (_underscoreNotationEnabled)
+                return "set_";
+            return "Set";
+        }
+
+        string ToCurrentNotation(string inputStr)
+        {
+            if (_underscoreNotationEnabled)
+                return TextExtensions.ToUnderscoreCase(inputStr);
+            return inputStr;
         }
     }
 }

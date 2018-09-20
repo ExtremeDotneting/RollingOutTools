@@ -23,7 +23,6 @@ namespace RollingOutTools.Localization
         public Task SaveTranslated(TranslatedRecord translatedRecord)
         {
             //Clear if limit here.
-
             throw new NotImplementedException();
         }
     }
