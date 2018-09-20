@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RollingOutTools.Storage\RollingOutTools.Storage.csproj" />
+    <ProjectReference Include="..\RollingOutTools.SimpleIoc\RollingOutTools.SimpleIoc.csproj" />
   </ItemGroup>
 
   <ItemGroup>
