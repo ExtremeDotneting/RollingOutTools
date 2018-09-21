@@ -72,7 +72,10 @@ namespace ReflectionMapTest
                 jsonStr, 
                 method.Parameters).ToArray();
             var res = await method.ExecuteAndAwait(inspectedObj, parameters);
-            Console.WriteLine("String with complex object and not sorted fields. Res " + res);
+            Console.WriteLine("String with complex object and not sorted fields.");
+            Console.WriteLine(jsonStr);
+            Console.WriteLine("Res " + res);
+
             Console.ReadLine();
         }
 

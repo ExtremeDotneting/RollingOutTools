@@ -30,28 +30,29 @@ namespace RollingOutTools.ReflectionVisit
         /// <summary>
         /// Return result from called method without any manipulations on result.
         /// </summary>
-        public object Execute(object globalInstance, object[] parameters)
+        public object Execute(object instance, object[] parameters)
         {
-            return InvokeAction(globalInstance, parameters);
+            return InvokeAction(instance, parameters);
         }
 
         /// <summary>
-        /// If method return task, this method will await it.
-        /// If it doesn`t - result object will be wrapped in Task for more simple usage.
+        /// If ReturnType is task, this method will await invokation result.
+        /// Else - result object will be wrapped in Task for more simple usage.
         /// </summary>
-        public async Task<object> ExecuteAndAwait(object globalInstance, object[] parameters)
+        public async Task<object> ExecuteAndAwait(object instance, object[] parameters)
         {
-            object invokeRes = Execute(globalInstance, parameters);
-            var task = invokeRes as Task;
-            if (task == null)
+            object invokeRes = Execute(instance, parameters);
+            
+            if (typeof(Task).IsAssignableFrom(ReturnType))
             {
-                return invokeRes;
-            }
-            else
-            {
+                var task = (Task)invokeRes;
                 await task;
                 return GetResultOrNullFromTask(task);
-            }            
+            }
+            else
+            { 
+                return invokeRes;
+            }          
         }
 
         object GetResultOrNullFromTask(Task task)

@@ -27,16 +27,17 @@ namespace RollingOutTools.ReflectionVisit
         /// <summary>
         /// Return result from called method without any manipulations on result.
         /// </summary>
-        /// <param name="globalInstance">Экземпляр типа, для которого был построен reflection map.</param>
+        /// <param name="instance">Экземпляр типа, для которого был построен reflection map.</param>
         /// <param name="parameters">Параметры передаваемые в метод</param>
-        object Execute(object globalInstance, object[] parameters);
+        object Execute(object instance, object[] parameters);
 
         /// <summary>
-        /// If method return task, this method will await it.
+        /// If ReturnType is task, this method will await invokation result.
+        /// Else - result object will be wrapped in Task for more simple usage.
         /// </summary>
-        /// <param name="globalInstance">Экземпляр типа, для которого был построен reflection map.</param>
+        /// <param name="instance">Экземпляр типа, для которого был построен reflection map.</param>
         /// <param name="parameters">Параметры передаваемые в метод</param>
-        Task<object> ExecuteAndAwait(object globalInstance, object[] parameters);
+        Task<object> ExecuteAndAwait(object instance, object[] parameters);
         
     }
 }
