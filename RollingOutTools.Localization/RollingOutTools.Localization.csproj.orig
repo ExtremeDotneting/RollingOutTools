@@ -8,8 +8,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
+<<<<<<< HEAD
+=======
   <ItemGroup>
     <ProjectReference Include="..\RollingOutTools.Common\RollingOutTools.Common.csproj" />
   </ItemGroup>
 
+>>>>>>> rolling-out-tools/master
 </Project>

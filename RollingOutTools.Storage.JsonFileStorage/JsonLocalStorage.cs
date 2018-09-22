@@ -27,13 +27,19 @@ namespace RollingOutTools.Storage.JsonFileStorage
         JsonSerializerSettings _serializeOpt;
         static object writingLock = 1;
 
-
+        /// <summary>
+        /// Storage name will be "def_localstorage"
+        /// </summary>
         public JsonLocalStorage() : this("def_localstorage")
         {
 
         }
-
-        public JsonLocalStorage(string valuesNamespace) : this(valuesNamespace, Environment.CurrentDirectory)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storageName">Storage name</param>
+        public JsonLocalStorage(string storageName) : this(storageName, Environment.CurrentDirectory)
         {
 
         }
@@ -41,8 +47,9 @@ namespace RollingOutTools.Storage.JsonFileStorage
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="valuesNamespace">File name or same.</param>
-        public JsonLocalStorage(string valuesNamespace, string dirPath)
+        /// <param name="storageName">Storage name</param>
+        /// <param name="path">Path to storage</param>
+        public JsonLocalStorage(string storageName, string path)
         {
             _serializeOpt = new JsonSerializerSettings();
             if (Debugger.IsAttached)
@@ -50,16 +57,16 @@ namespace RollingOutTools.Storage.JsonFileStorage
                 _serializeOpt.Formatting = Formatting.Indented;
             }
 
-            _storageFilePath = Path.Combine(dirPath, valuesNamespace + ".json");
-            _syncFilePath= Path.Combine(dirPath, valuesNamespace + "_sync.txt");
+            _storageFilePath = Path.Combine(path, storageName + ".json");
+            _syncFilePath= Path.Combine(path, storageName + "_sync.txt");
             CommonHelpers.TryCreateFileIfNotExists(_storageFilePath);
             CommonHelpers.TryCreateFileIfNotExists(_syncFilePath);
 
         }
 
         /// <summary>
-        /// Automatically synchronized with Get. If 'null' - will remove value.
-        /// If you not closing application, recommended not await task.
+        /// Method is synchronized with Get. If value is 'null', then method will remove that value from the dictionary.
+        /// If you're not closing the application, it's not recommended to use await keyword.
         /// </summary>
         public async Task Set(string key, object value)
         {
@@ -90,8 +97,8 @@ namespace RollingOutTools.Storage.JsonFileStorage
         }
 
         /// <summary>
-        /// Automatically synchronized with Set. 
-        /// If key not exists - will return null for reference type and default value for value types.
+        /// Method is synchronized with Set. 
+        /// If key doesn't exist, then method will return null for reference type or default value for value types.
         /// </summary>
         public async Task<T> Get<T>(string key)
         {
@@ -102,8 +109,8 @@ namespace RollingOutTools.Storage.JsonFileStorage
         }
 
         /// <summary>
-        /// Remember, that null value is equals that it not exists. 
-        /// So, if before you set 'key_name' value to null, then ContainsKey will return false;
+        /// If the key doesn't exist, throws a null exception.
+        /// If 'key_name' is equals to null, method will return false
         /// </summary>
         public async Task<bool> ContainsKey(string key)
         {
@@ -203,9 +210,5 @@ namespace RollingOutTools.Storage.JsonFileStorage
             CommonHelpers.TryCreateFileIfNotExists(_syncFilePath);
             CommonHelpers.TryWriteAllText(_syncFilePath, newIteration.ToString(), TimeoutSeconds);
         }
-
-        
-
-
     }
 }
