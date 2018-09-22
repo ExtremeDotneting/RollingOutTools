@@ -19,7 +19,7 @@ namespace RollingOutTools.Storage.WithLiteDB
     /// </summary>
     public class LiteDatabaseLocalStorage : IKeyValueStorage
     {
-        const string DefaultDbFileName= "local_storage.db";
+        const string DefaultDbFileName = "local_storage.db";
 
         readonly object Locker = new object();
         string _collectionName;

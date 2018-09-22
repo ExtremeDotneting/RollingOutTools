@@ -53,7 +53,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RollingOutTools.ReflectionVisit\RollingOutTools.ReflectionVisit.csproj">
+    <ProjectReference Include="..\..\RollingOutTools.ReflectionVisit\RollingOutTools.ReflectionVisit.csproj">
       <Project>{BCF6233B-CFA1-4FCC-932D-D5CB4EEA6CD7}</Project>
       <Name>RollingOutTools.ReflectionVisit</Name>
     </ProjectReference>
