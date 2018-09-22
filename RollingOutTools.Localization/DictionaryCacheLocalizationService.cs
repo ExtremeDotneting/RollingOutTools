@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
@@ -6,24 +8,34 @@ namespace RollingOutTools.Localization
 {
     public class DictionaryCacheLocalizationService : ICahceLocalizationService
     {
+        ConcurrentDictionary<string, TranslatedRecord> _cacheDict = new ConcurrentDictionary<string, TranslatedRecord>();
+        Queue<TranslatedRecord> _cacheQueue = new Queue<TranslatedRecord>();
+
         public int Limit { get; }
 
-        public DictionaryCacheLocalizationService(int limit=100)
+        public DictionaryCacheLocalizationService(int limit=300)
         {
             Limit = limit;
         }
 
         public async Task<string> GetTranslated(string sourceString, CultureInfo sourceCultureInfo, CultureInfo translateCultureInfo)
         {
-            //!Удали после написания кода.
-            //!Используй для поиска свойство Key у TranslatedRecord.
-            throw new NotImplementedException();
+            string key = TranslatedRecord.GetKey(sourceString, sourceCultureInfo, translateCultureInfo);
+            _cacheDict.TryGetValue(key, out TranslatedRecord translateRec);            
+            return translateRec.TranslatedString;
         }
 
-        public Task SaveTranslated(TranslatedRecord translatedRecord)
+        public async Task SaveTranslated(TranslatedRecord translatedRecord)
         {
             //Clear if limit here.
-            throw new NotImplementedException();
+            if (_cacheDict.Count > Limit)
+            {
+                var toRemove=_cacheQueue.Peek();
+                _cacheDict.TryRemove(toRemove.Key, out var tr);
+            }
+
+            _cacheQueue.Enqueue(translatedRecord);
+            _cacheDict.TryAdd(translatedRecord.Key, translatedRecord);
         }
     }
 }

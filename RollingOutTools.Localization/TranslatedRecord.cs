@@ -12,8 +12,12 @@ namespace RollingOutTools.Localization
 
         string GetKey()
         {
-            string res = SourceString + "__" + SourceCultureInfo.Name + "__" + TranslateCultureInfo.Name;
-            return res;
+            return GetKey(SourceString, SourceCultureInfo, TranslateCultureInfo);
+        }
+
+        public static string GetKey(string sourceString, CultureInfo sourceCultureInfo, CultureInfo translateCultureInfo)
+        {
+            return sourceString + "__" + sourceCultureInfo.Name + "__" + translateCultureInfo.Name;
         }
     }
 }

@@ -25,6 +25,7 @@ namespace ReflectionMapTest
             Console.WriteLine(strRepresentation);
             Console.ReadLine();
 
+            await TestParamsFromJsonComplexObjLikeArray();
             await TestParamsFromJsonArray();
             await TestParamsFromComplexObj();
             await TestSimpleCall();
@@ -61,6 +62,16 @@ namespace ReflectionMapTest
             parameters = JsonToParamsBindings.Inst.ResolveFromArray("[10,'it`s str',4,9,9,9,false]", method.Parameters).ToArray();
             res = await method.ExecuteAndAwait(inspectedObj, parameters);
             Console.WriteLine("Too much params and wrong type of second param [10,'it`s str',4,9,9,9,false]. Res " + res);
+            Console.ReadLine();
+        }
+
+        public static async Task TestParamsFromJsonComplexObjLikeArray()
+        {
+            string jsonStr = "{\"0\":\"hi mark\",\"1\":123}";
+            var method = refMap.LongNameAndMethod["prefixName.CurrentSubObj.AnotherIncludedObj.Sum"];
+            object[] parameters = JsonToParamsBindings.Inst.ResolveFromArray(jsonStr, method.Parameters).ToArray();
+            var res = await method.ExecuteAndAwait(inspectedObj, parameters);
+            Console.WriteLine($"Params {jsonStr}. Res " + res);
             Console.ReadLine();
         }
 
