@@ -64,7 +64,7 @@ namespace RollingOutTools.Localization
             {
                 if (checkRowsCountIsSame && rowsCount != item.Strings.Count)
                     throw new Exception("Count of rows must be same for all localizations.");
-                var cultInfo = new CultureInfo(item.CultureName);
+                var cultInfo = CultureInfo.GetCultureInfo(item.CultureName);
                 _availableTranslates.Add(cultInfo);
             }
 
@@ -76,11 +76,11 @@ namespace RollingOutTools.Localization
 
         public async Task<string> GetTranslated(string sourceString, CultureInfo sourceCultureInfo, CultureInfo translateCultureInfo)
         {
-            if (TryFindCulture(sourceCultureInfo))
+            if (!TryFindCulture(sourceCultureInfo))
             {
                 throw new Exception($"Can`t find culture '{sourceCultureInfo.Name}'");
             }
-            if (TryFindCulture(translateCultureInfo))
+            if (!TryFindCulture(translateCultureInfo))
             {
                 throw new Exception($"Can`t find culture '{translateCultureInfo.Name}'");
             }
@@ -107,7 +107,7 @@ namespace RollingOutTools.Localization
                 {
                     if (item.CultureName != cultureInfo.Name)
                         continue;
-                    var cultInfo = new CultureInfo(item.CultureName);
+                    var cultInfo = CultureInfo.GetCultureInfo(item.CultureName);
                     _cachedLocalizationsIndexToStr.TryAdd(cultInfo, item.Strings);
                     containsCulture = true;
                 }

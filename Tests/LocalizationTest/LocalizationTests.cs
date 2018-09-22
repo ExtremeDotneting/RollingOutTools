@@ -18,14 +18,16 @@ namespace RollingOutTools.Tests
             ILocalizationService _localizationService = new ComplexLocalizationService(
                 new List<ILocalizationService>(){
                     new DictionaryCacheLocalizationService(),
-                    new JsonFileLocalizationService("test.json"),
+                    new JsonFileLocalizationService("translate.json"),
                     new LitedbCacheLocalizationService("test_cache.db"),
-                    new GoogleTranslateLocalizationService()
+                    new GoogleTranslateLocalizationService(),
+                    new DefaultLocalizationService()
             });
-            var record = await _localizationService.GetTranslated("привет",
-                CultureInfo.GetCultureInfo("ru-ru"),
-                CultureInfo.GetCultureInfo("en-us"));
-            Assert.Equal("hi", record);
+            var record = await _localizationService.GetTranslated(
+                "привет",
+                CultureInfo.GetCultureInfo("ru-RU"),
+                CultureInfo.GetCultureInfo("en-US"));
+            Assert.Equal("hello", record);
         }
     }
 }

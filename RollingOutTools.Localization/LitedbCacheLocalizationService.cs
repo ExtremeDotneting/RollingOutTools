@@ -18,9 +18,9 @@ namespace RollingOutTools.Localization
             throw new NotImplementedException();
         }
 
-        public Task SaveTranslated(TranslatedRecord translatedRecord)
+        public async Task SaveTranslated(TranslatedRecord translatedRecord)
         {
-            throw new NotImplementedException();
+
         }
 
     }

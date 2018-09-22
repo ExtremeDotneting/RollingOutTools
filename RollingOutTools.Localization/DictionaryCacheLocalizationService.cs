@@ -28,7 +28,7 @@ namespace RollingOutTools.Localization
         public async Task SaveTranslated(TranslatedRecord translatedRecord)
         {
             //Clear if limit here.
-            if (_cacheDict.Count > Limit)
+            if (_cacheDict.Count > Limit && _cacheDict.ContainsKey(translatedRecord.Key))
             {
                 var toRemove=_cacheQueue.Peek();
                 _cacheDict.TryRemove(toRemove.Key, out var tr);

@@ -38,9 +38,9 @@ namespace RollingOutTools.Localization
             foreach (var serv in _localizationServices)
             {
                 string translatedStr = await serv.TryGetTranslated(sourceString, sourceCultureInfo, translateCultureInfo);
-                if (!string.IsNullOrWhiteSpace(sourceString))
-                    return translatedStr;
-                else if(_cacheLocalizationServices.Count>0)
+                if (string.IsNullOrWhiteSpace(translatedStr))
+                    continue;
+                if(_cacheLocalizationServices.Count>0)
                 {
                     //Save to cache
                     TranslatedRecord rec = new TranslatedRecord()
@@ -56,7 +56,9 @@ namespace RollingOutTools.Localization
                             rec
                             );
                     }
+                    
                 }
+                return translatedStr;
             }
             throw new Exception("Can`t find translated string in all services.");
         }
