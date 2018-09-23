@@ -14,7 +14,7 @@ namespace RollingOutTools.Localization
         {
             database = new LiteDatabase(path);
             records = database.GetCollection<TranslatedRecord>("translatedRecords");
-            records.EnsureIndex("Key");
+            records.EnsureIndex(x => x.Key);
         }
 
         public async Task<string> GetTranslated(string sourceString, CultureInfo sourceCultureInfo, CultureInfo translateCultureInfo)
