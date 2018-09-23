@@ -19,7 +19,7 @@ namespace RollingOutTools.Localization
         ConcurrentDictionary<CultureInfo, List<string>> _cachedLocalizationsIndexToStr = 
             new ConcurrentDictionary<CultureInfo, List<string>>();
 
-        List<CultureInfo> _availableTranslates=new List<CultureInfo>();
+        List<CultureInfo> _availableTranslates = new List<CultureInfo>();
 
         CultureInfo _defaultCulture;
 
@@ -52,7 +52,7 @@ namespace RollingOutTools.Localization
             */
             
             _jsonPath = path;
-            string jsonStr=File.ReadAllText(path);
+            string jsonStr = File.ReadAllText(path);
             var localizations = JsonConvert.DeserializeObject<Localization[]>(jsonStr);
             if (localizations.Length < 2)
             {
@@ -63,7 +63,7 @@ namespace RollingOutTools.Localization
             foreach(var item in localizations)
             {
                 if (checkRowsCountIsSame && rowsCount != item.Strings.Count)
-                    throw new Exception("Count of rows must be same for all localizations.");
+                    throw new Exception("Number of rows must be same for all localizations.");
                 var cultInfo = CultureInfo.GetCultureInfo(item.CultureName);
                 _availableTranslates.Add(cultInfo);
             }
@@ -85,7 +85,7 @@ namespace RollingOutTools.Localization
                 throw new Exception($"Can`t find culture '{translateCultureInfo.Name}'");
             }
 
-            int index=_cachedLocalizationsIndexToStr[sourceCultureInfo].IndexOf(sourceString);
+            int index = _cachedLocalizationsIndexToStr[sourceCultureInfo].IndexOf(sourceString);
             string translateStr = _cachedLocalizationsIndexToStr[translateCultureInfo][index];
             if (translateStr == KeywordToUseDefaultTranslate)
             {
@@ -94,7 +94,7 @@ namespace RollingOutTools.Localization
             return translateStr;
         }
 
-        bool TryFindCulture(CultureInfo cultureInfo, string jsonStr=null)
+        bool TryFindCulture(CultureInfo cultureInfo, string jsonStr = null)
         {
             bool containsCulture = _cachedLocalizationsIndexToStr.ContainsKey(cultureInfo);
             if (!containsCulture && _availableTranslates.Contains(cultureInfo))

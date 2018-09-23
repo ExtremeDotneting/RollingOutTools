@@ -8,10 +8,6 @@ namespace RollingOutTools.Localization
 {
     public class DefaultLocalizationService : ILocalizationService
     {
-        public DefaultLocalizationService()
-        {
-        }
-
         public async Task<string> GetTranslated(string sourceString, CultureInfo sourceCultureInfo, CultureInfo translateCultureInfo)
         {
             return sourceString;

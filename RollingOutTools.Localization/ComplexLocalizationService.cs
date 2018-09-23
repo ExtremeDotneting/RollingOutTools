@@ -52,11 +52,8 @@ namespace RollingOutTools.Localization
                     };
                     foreach (var cacheServ in _cacheLocalizationServices)
                     {
-                        await cacheServ.SaveTranslated(
-                            rec
-                            );
+                        await cacheServ.SaveTranslated(rec);
                     }
-                    
                 }
                 return translatedStr;
             }
