@@ -9,25 +9,35 @@ namespace RollingOutTools.Localization
     {
         private LiteDatabase database;
         private LiteCollection<TranslatedRecord> records;
+        private string path;
 
         public LitedbCacheLocalizationService(string path)
-        {
-            database = new LiteDatabase(path);
-            records = database.GetCollection<TranslatedRecord>("translatedRecords");
-            records.EnsureIndex(x => x.Key);
+        {   using (database = new LiteDatabase(path))
+            {
+                records = database.GetCollection<TranslatedRecord>("translatedRecords");
+                records.EnsureIndex(x => x.Key);
+            }
         }
 
         public async Task<string> GetTranslated(string sourceString, CultureInfo sourceCultureInfo, CultureInfo translateCultureInfo)
         {
-            var wantedKey = TranslatedRecord.GetKey(sourceString, 
-                sourceCultureInfo, 
-                translateCultureInfo);
-            return records.FindOne(x => x.Key == wantedKey).TranslatedString;
+            using (database = new LiteDatabase(path))
+            {
+                records = database.GetCollection<TranslatedRecord>("translatedRecords");
+                var wantedKey = TranslatedRecord.GetKey(sourceString,
+                        sourceCultureInfo,
+                        translateCultureInfo);
+                return records.FindOne(x => x.Key == wantedKey).TranslatedString;
+            }   
         }
 
         public async Task SaveTranslated(TranslatedRecord translatedRecord)
         {
-            records.Insert(translatedRecord);
+            using (database = new LiteDatabase(path))
+            {
+                records = database.GetCollection<TranslatedRecord>("translatedRecords");
+                records.Insert(translatedRecord);
+            }
         }
 
         #region IDisposable Support
