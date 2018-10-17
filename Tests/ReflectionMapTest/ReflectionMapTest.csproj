@@ -53,6 +53,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\RollingOutTools.ReflectionVisit.Metadata\RollingOutTools.ReflectionVisit.Metadata.csproj">
+      <Project>{1282934D-4A62-4809-8A35-391CC748127C}</Project>
+      <Name>RollingOutTools.ReflectionVisit.Metadata</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\RollingOutTools.ReflectionVisit\RollingOutTools.ReflectionVisit.csproj">
       <Project>{BCF6233B-CFA1-4FCC-932D-D5CB4EEA6CD7}</Project>
       <Name>RollingOutTools.ReflectionVisit</Name>

@@ -1,13 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.1</Version>
+    <Version>2.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RollingOutTools.Common\RollingOutTools.Common.csproj" />
+    <ProjectReference Include="..\RollingOutTools.ReflectionVisit.Metadata\RollingOutTools.ReflectionVisit.Metadata.csproj" />
   </ItemGroup>
 
 </Project>

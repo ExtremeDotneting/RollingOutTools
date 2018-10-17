@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace RollingOutTools.ReflectionVisit
+namespace RollingOutTools.ReflectionVisit.Metadata
 {
     /// <summary>
     /// Этим атрибутом вы должны отметить методы, которые хотите отобразить в ReflectionMap.

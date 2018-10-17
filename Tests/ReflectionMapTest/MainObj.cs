@@ -1,4 +1,5 @@
 ﻿using RollingOutTools.ReflectionVisit;
+using RollingOutTools.ReflectionVisit.Metadata;
 using System.Threading.Tasks;
 
 namespace ReflectionMapTest

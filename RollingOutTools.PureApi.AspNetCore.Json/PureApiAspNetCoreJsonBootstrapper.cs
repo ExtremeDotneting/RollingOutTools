@@ -7,6 +7,10 @@ namespace RollingOutTools.PureApi.AspNetCore.Json
     public static class PureApiAspNetCoreJsonBootstrapper
     {
         internal static bool IsInit{get;private set;}
+
+        /// <summary>
+        /// Only for debug.
+        /// </summary>
         public static bool ThrowExceptions { get; set; }=false;
 
         /// <summary>
@@ -30,7 +34,7 @@ namespace RollingOutTools.PureApi.AspNetCore.Json
             builder.AddMvcOptions(options =>
             {
                 options.ModelBinderProviders.Insert(0, new PureApiJsonModelBinderProvider());
-            });
+            });            
             
             IsInit = true;
             return builder;

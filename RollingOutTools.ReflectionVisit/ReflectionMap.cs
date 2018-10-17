@@ -1,4 +1,5 @@
 ﻿using RollingOutTools.Common;
+using RollingOutTools.ReflectionVisit.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -226,8 +227,8 @@ namespace RollingOutTools.ReflectionVisit
 
                         var newMethod = new ReflectionMapMethod()
                         {
-                            DisplayName = prefix + (NotationGetPrefix() + (attr.DisplayName ?? ToCurrentNotation(item.Name))),
-                            RealName = realNamePrefix + "Set" + item.Name,
+                            DisplayName = prefix + (NotationSetPrefix() + (attr.DisplayName ?? ToCurrentNotation(item.Name))),
+                            RealName = realNamePrefix + item.Name,
                             Description = attr.Description,
                             Parameters = new Parameter[] { param },
                             ReturnType = typeof(void),

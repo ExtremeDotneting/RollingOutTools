@@ -13,9 +13,4 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\RollingOutTools.Json\RollingOutTools.Json.csproj" />
-    <ProjectReference Include="..\RollingOutTools.PureApi.AspNetCore\RollingOutTools.PureApi.AspNetCore.csproj" />
-  </ItemGroup>
-
 </Project>
