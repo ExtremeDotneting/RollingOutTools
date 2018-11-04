@@ -21,9 +21,9 @@ namespace RollingOutTools.ReflectionVisit
         /// помеченные через IncludedObjReflectionMapAttribute будут исследованы.</param>
         /// </summary>
         public ReflectionMap(Type inspectedType,string splitter= ".",
-            bool allowIncludedOnjects=false,string prefixName=null,bool underscoreNotation=false)
+            bool allowIncludedObjects=false,string prefixName=null,bool underscoreNotation=false)
         {
-            _allowIncludedOnjects = allowIncludedOnjects;
+            _allowIncludedOnjects = allowIncludedObjects;
             _splitter = splitter;
             _underscoreNotationEnabled = underscoreNotation;
             _underscoreNotationEnabled = underscoreNotation;

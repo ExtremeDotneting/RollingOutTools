@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RollingOutTools.Common;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,12 +16,15 @@ namespace RollingOutTools.CmdLine
             try
             {
                 File.WriteAllText(
-                        jsonEditorFilePath,
-                        jsonPrototypeString
-                        );
-                Process editorProcess = Process.Start(jsonEditorFilePath);
-                editorProcess.WaitForExit();
-                return File.ReadAllText(jsonEditorFilePath);
+                    jsonEditorFilePath,
+                    jsonPrototypeString
+                    );
+
+                var process = TryStartProcess(jsonEditorFilePath);
+                TryWaitForExit(process);
+                string res;
+                CommonHelpers.TryReadAllText(jsonEditorFilePath, out res, 120);
+                return res;
             }
             catch (Exception ex)
             {
@@ -42,6 +46,32 @@ namespace RollingOutTools.CmdLine
                     return res;
                 }
             }
+        }
+
+        static Process TryStartProcess(string jsonEditorFilePath)
+        {
+            Process editorProcess = null;
+            try
+            {
+                editorProcess = Process.Start(jsonEditorFilePath);
+            }
+            catch
+            {
+                editorProcess = new Process();
+                editorProcess.StartNetCore(jsonEditorFilePath);
+            }
+            return editorProcess;
+
+        }
+
+        static void TryWaitForExit(Process editorProcess)
+        {
+            try
+            {
+                editorProcess.WaitForExit();
+            }
+            catch { }
+
         }
     }
 }
