@@ -1,22 +1,14 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
-namespace RollingOutTools.ReflectionVisit
+namespace RollingOutTools.ReflectionVisit.ModelBinders
 {
-    public class JsonToParamsBindings
+    public class JsonToParamsBindings:BaseParamsBindings
     {
-        public static JsonToParamsBindings Inst { get; } = new JsonToParamsBindings();
-
-        static readonly JsonSerializer _jsonSerializer;
-
-        static JsonToParamsBindings()
-        {
-            _jsonSerializer = JsonSerializer.Create();
-        }
+        public static JsonToParamsBindings Inst { get; } = new JsonToParamsBindings();        
 
         /// <summary>
         /// Получает набор параметров из json массива. При этом соответствие устанавливается по порядковому номеру.
@@ -37,20 +29,9 @@ namespace RollingOutTools.ReflectionVisit
                 {
                     currentValue = jToken[i].ToObject(paramType);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    if (ignoreErrors)
-                    {
-                        if (paramType.IsValueType)
-                        {
-                            currentValue = Activator.CreateInstance(paramType);
-                        }
-
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    currentValue = ThrowOrDefaultValue(ex, ignoreErrors, paramType);
                 }
                 res.Add(currentValue);
                 i++;
@@ -69,7 +50,7 @@ namespace RollingOutTools.ReflectionVisit
             var paramTypes = new List<Type>();
             foreach(var parameter in parameters)
             {
-                paramTypes.Add(parameter.ParamType);
+                paramTypes.Add(parameter.Info.ParameterType);
             }
             return ResolveFromArray(jsonArrayStr,paramTypes, ignoreErrors, jsonSerializer);
         }
@@ -88,26 +69,15 @@ namespace RollingOutTools.ReflectionVisit
             int i = 0;
             foreach (var parameter in parameters)
             {
-                var paramType = parameter.ParamType;
+                var paramType = parameter.Info.ParameterType;
                 object currentValue = null;
                 try
                 {
                     currentValue = jToken[parameter.ParamName].ToObject(paramType);
                 }
-                catch
+                catch(Exception ex)
                 {
-                    if (ignoreErrors)
-                    {
-                        if (paramType.IsValueType)
-                        {
-                            currentValue = Activator.CreateInstance(paramType);
-                        }
-
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    currentValue = ThrowOrDefaultValue(ex, ignoreErrors, paramType);
                 }
                 res.Add(currentValue);
                 i++;
@@ -115,14 +85,6 @@ namespace RollingOutTools.ReflectionVisit
             return res;
         }
 
-        JToken GetJToken(string jsonArrayStr, JsonSerializer jsonSerializer)
-        {
-            if (jsonSerializer == null)
-            {
-                jsonSerializer = _jsonSerializer;
-            }
-            JToken jToken = jsonSerializer.Deserialize<JToken>(new JsonTextReader(new StringReader(jsonArrayStr)));
-            return jToken;
-        }
+        
     }
 }

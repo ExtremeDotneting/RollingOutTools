@@ -17,5 +17,11 @@ namespace ReflectionMapTest
         {
 
         }
+
+        [MethodReflectionMap]
+        public void Foo(DateTime dtParam, string strParam, bool boolParam, int intParam)
+        {
+
+        }
     }
 }

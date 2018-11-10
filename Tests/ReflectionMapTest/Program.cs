@@ -1,4 +1,5 @@
 ﻿using RollingOutTools.ReflectionVisit;
+using RollingOutTools.ReflectionVisit.ModelBinders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,12 +26,28 @@ namespace ReflectionMapTest
             Console.WriteLine(strRepresentation);
             Console.ReadLine();
 
+            await TestParamsFromCmd();
             await TestParamsFromJsonComplexObjLikeArray();
             await TestParamsFromJsonArray();
             await TestParamsFromComplexObj();
             await TestSimpleCall();
             await TestReturnRes();
             
+        }
+
+        public static async Task TestParamsFromCmd()
+        {
+            var str = "/strParam:\"it`s string\"  /boolParam:1 /intParam:6";
+            var method = refMap.LongNameAndMethod["prefixName.CurrentSubObj.Foo"];
+            object[] parameters = CmdStringToParamsBindings.Inst.ResolveFromCmd(
+                str,
+                method.Parameters).ToArray();
+            var res = await method.ExecuteAndAwait(inspectedObj, parameters);
+            Console.WriteLine("String with cmd params.");
+            Console.WriteLine(str);
+            Console.WriteLine("Res " + res);
+
+            Console.ReadLine();
         }
 
         public static async Task TestSimpleCall()
@@ -63,7 +80,7 @@ namespace ReflectionMapTest
             res = await method.ExecuteAndAwait(inspectedObj, parameters);
             Console.WriteLine("Too much params and wrong type of second param [10,'it`s str',4,9,9,9,false]. Res " + res);
             Console.ReadLine();
-        }
+        }        
 
         public static async Task TestParamsFromJsonComplexObjLikeArray()
         {

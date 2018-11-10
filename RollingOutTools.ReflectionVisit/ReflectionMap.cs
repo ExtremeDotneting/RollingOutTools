@@ -97,7 +97,7 @@ namespace RollingOutTools.ReflectionVisit
 
                         }
                         isFirst = false;
-                        newStr += parameter.ParamType.Name + "  "
+                        newStr += parameter.Info.ParameterType.Name + "  "
                             + ToCurrentNotation(parameter.ParamName);
                     }
                     newStr += ")";
@@ -157,7 +157,7 @@ namespace RollingOutTools.ReflectionVisit
                 resArr[i] = new Parameter()
                 {
                     ParamName = arr[i].Name,
-                    ParamType = arr[i].ParameterType
+                    Info = arr[i]
                 };
             }
             return resArr;
@@ -221,7 +221,6 @@ namespace RollingOutTools.ReflectionVisit
                     {
                         var param = new Parameter
                         {
-                            ParamType = item.PropertyType,
                             ParamName = "val"
                         };
 

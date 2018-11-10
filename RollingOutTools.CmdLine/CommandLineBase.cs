@@ -4,10 +4,23 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using RollingOutTools.Common;
+using RollingOutTools.ReflectionVisit.ModelBinders;
+using RollingOutTools.ReflectionVisit;
 using RollingOutTools.Storage;
 
 namespace RollingOutTools.CmdLine
 {
+    public class ResolvedCmdInfo
+    {
+        public MethodInfo MethodInfo { get; set; }
+
+        public string CmdName { get; set; }
+
+        public string OriginalMethodName { get; set; }
+
+        public string Description { get; set; }
+    }
+
     /// <summary>
     /// Базовый класс для генерации cli.
     /// Можно писать методы с входными параметрами (массив строк).
@@ -15,50 +28,68 @@ namespace RollingOutTools.CmdLine
     /// </summary>
     public class CommandLineBase
     {
-        public CmdLineExtension Cmd { get; private set; }
-        protected readonly ICmdSwitcher CurrentCmdSwitcher;
-        bool _isAutorunEnabled = false;
-        bool _isInRun = true;
-
         /// <summary>
-        /// Показывает открыта ли сейчас эта консоль.
+        /// Показывает открыта ли сейчас эта консоль в стеке консолей.
         /// </summary>
-        public bool IsInRun {
+        public bool IsInRun
+        {
             get { return _isInRun; }
             private set
             {
-                if(!_isInRun)
+                if (!_isInRun)
                     OnQuit?.Invoke();
                 _isInRun = value;
 
             }
-        } 
+        }
 
-        public Dictionary<string, MethodInfo> CmdNameAndMethod { get; }
+        public CmdLineExtension Cmd { get; private set; }
+
+        public Dictionary<string, ResolvedCmdInfo> CmdNameAndInfo { get; } = new Dictionary<string, ResolvedCmdInfo>();
+
         public event Action OnQuit;
+
+        CmdSwitcher _currentCmdSwitcher;
+
+        bool _isInRun = true;
 
         /// <summary>
         /// Используйте это свойство в своих командах, чтоб предложить следующую команду.
         /// </summary>
-        public string LastCmdName
+        public string LastCmdNameAndParams
         {
             get
             {
-                return StorageHardDrive.Get<string>(this.GetType().Name+".last_cmd").Result;
+                return StorageHardDrive.Get<string>(this.GetType().Name + ".last_cmd_params").Result;
             }
             set
             {
-                StorageHardDrive.Set(this.GetType().Name + ".last_cmd", value);
+                StorageHardDrive.Set(this.GetType().Name + ".last_cmd_params", value);
             }
         }
 
-        public CommandLineBase(ICmdSwitcher cmdSwitcher, CmdLineExtension cmdLineExtension=null)
+        public CommandLineBase(CmdLineExtension cmdLineExtension = null)
         {
             Cmd = cmdLineExtension ?? CmdLineExtension.Inst;
-            CurrentCmdSwitcher = cmdSwitcher;
-            CmdNameAndMethod = CreateReflectionDict();
+            CmdNameAndInfo = CreateReflectionDict();
         }
 
+        internal void SetCmdSwitcher(CmdSwitcher cmdSwitcher)
+        {
+            _currentCmdSwitcher = cmdSwitcher;
+        }
+
+        /// <summary>
+        /// Open another cmd, current cmd now not available until sub cmd is not closed.
+        /// </summary>
+        protected void TryOpenSubCmd(CommandLineBase commandLineBase)
+        {
+            try
+            {
+                _currentCmdSwitcher.PushCmdInStack(commandLineBase);
+            }
+            catch { }
+        }
 
         public virtual void OnStart()
         {
@@ -71,20 +102,23 @@ namespace RollingOutTools.CmdLine
         [CmdInfo(CmdName = "help")]
         public void HelpCmd()
         {
-            StringBuilder res = new StringBuilder("\tВы можете передавать параметры в метод, разделяя из через '/'.\n" +
-                "\tИспользуйте параметр /auto для автоматического выполнения команд.\n\n");
-            foreach (MethodInfo item in this.GetType().GetMethods())
+            var commonInfo = "In methods with parameters you can pass values(or default will be used)." +
+                "\nTo define parameter values use json syntax." +
+                "\nTo pass parameters you can write something like " +
+                "\n -> cmd_name /strParam:\"it`s string\" /boolParam:1 /intParam:6" +
+                "\nAlso, you can pass command and parameters in cmd arguments, when start your app. Example:" +
+                "\n -> dotnet MyAppFile.dll cmd_name /strParam ..." +
+                "\n\nMethods list:\n";
+            StringBuilder res = new StringBuilder(commonInfo);
+            foreach (var cmdPair in CmdNameAndInfo)
             {
-                CmdInfoAttribute attr = item.GetCustomAttribute(typeof(CmdInfoAttribute)) as CmdInfoAttribute;
-                if (attr != null && attr.CmdName != "help")
+                var cmdInfo = cmdPair.Value;
+                if (cmdInfo.CmdName != "help")
                 {
-                    //TODO: Remove attribute crunch.
-                    attr.CmdName = attr?.CmdName ?? TextExtensions.ToUnderscoreCase(item.Name);
-
-                    string newStr = "\t" + attr.CmdName + " - "+ item.Name + "(";
+                    string newStr = "\t" + cmdInfo.CmdName + " - " + cmdInfo.OriginalMethodName + "(";
                     bool isFirst = true;
 
-                    foreach (var parameter in item.GetParameters())
+                    foreach (var parameter in cmdInfo.MethodInfo.GetParameters())
                     {
                         if (!isFirst)
                         {
@@ -95,22 +129,25 @@ namespace RollingOutTools.CmdLine
                     }
                     newStr += ");";
 
-                    if (attr.Description != null)
+                    if (cmdInfo.Description != null)
                     {
-                        newStr += $"  /*{attr.Description}*/";
+                        var description = cmdInfo.Description
+                            .Replace("\n", "\n\t* ");
+                        newStr += $"  /*{description}*/";
                     }
                     res.AppendLine(newStr);
                 }
 
-                
+
             }
-            Cmd.Write(res.ToString());
+            var resStr = res.ToString();//.Replace("\n","\n\t");
+            Cmd.Write(resStr);
         }
 
         public virtual void OnEveryLoop()
         {
             Cmd.Write(
-                $"cmd ( { LastCmdName ?? ""} ) : ",
+                $"cmd ( { LastCmdNameAndParams ?? ""} ) : ",
                 ConsoleColor.DarkGreen
                 );
 
@@ -126,59 +163,36 @@ namespace RollingOutTools.CmdLine
         /// Запускает соответствующий метод по названию команды. 
         /// Перехватывает ошибки выполнения.
         /// </summary>
-        public void ExecuteCmd(string cmdName)
+        public void ExecuteCmd(string cmdAndParamsStr)
         {
+            if (string.IsNullOrWhiteSpace(cmdAndParamsStr))
+            {
+                cmdAndParamsStr = LastCmdNameAndParams;
+            }
+            else
+            {
+                LastCmdNameAndParams = cmdAndParamsStr;
+            }
+
             try
             {
-                cmdName = cmdName.Trim();
-                if (string.IsNullOrWhiteSpace(cmdName))
+                var cmdName = ResolveCmdName(cmdAndParamsStr);
+                if (CmdNameAndInfo.TryGetValue(cmdName, out var cmdInfo))
                 {
-                    cmdName = LastCmdName;
-                }
-                string[] cmdArray = cmdName.Split('/');
+                    var currentMethodInfo = cmdInfo.MethodInfo;
+                    var parameters = ResolveCmdParams(cmdAndParamsStr, cmdInfo);
 
-                //имя команды
-                string cmdShortName= cmdArray[0].Trim();
-
-               
-                if (CmdNameAndMethod.ContainsKey(cmdShortName))
-                {
-                    //параметры{
-                    List<string> cmdParams = new List<string>();
-                    for (int i = 1; i < cmdArray.Length; i++)
-                    {
-                        if (string.IsNullOrWhiteSpace(cmdArray[i]))
-                        {
-                            continue;
-                        }
-                        cmdParams.Add(cmdArray[i].Trim());
-                    }
-                    //}параметры
-                    var currentMethodInfo = CmdNameAndMethod[cmdShortName];
-                   
-                    //Включаем автозапуск, если такой параметр был передан.
-                    //ВНИМАНИЕ! Автозапуск не потокобезопасен.
-                    _isAutorunEnabled = cmdParams.Contains("auto") && GetCurrentMemberAttribute(currentMethodInfo.Name).CanAutorun;
-                    if (_isAutorunEnabled)
-                    {
-                        cmdParams.Remove("auto");
-                    }
-
-                    var firstParamInfo = currentMethodInfo.GetParameters().Length > 0 ? currentMethodInfo.GetParameters()[0] : null;
-                    bool? isTakeParams=firstParamInfo?.ParameterType.IsAssignableFrom(typeof(List<string>));
-
-                    if (isTakeParams == true)
-                        currentMethodInfo.Invoke(this, new object[] { cmdParams });
+                    if (parameters.Length > 0)
+                        currentMethodInfo.Invoke(this, parameters);
                     else
-                        currentMethodInfo.Invoke(this, new object[] {});
-
-                    LastCmdName = cmdName;
+                        currentMethodInfo.Invoke(this, new object[0]);
+                    LastCmdNameAndParams = cmdAndParamsStr;
                 }
 
                 else
                 {
                     Cmd.WriteLine("Command not found.");
-                }
+                }                
             }
             catch (Exception ex)
             {
@@ -191,7 +205,7 @@ namespace RollingOutTools.CmdLine
                 //}
                 Cmd.Write("\nWant to ignore it? Press y/n (y): ", ConsoleColor.DarkRed);
                 var consoleText = Cmd.ReadLine();
-                if (consoleText.Trim()=="")
+                if (consoleText.Trim() == "")
                 {
                     //throw;
                 }
@@ -200,10 +214,42 @@ namespace RollingOutTools.CmdLine
                     throw;
                 }
             }
-            finally
+        }
+
+        string ResolveCmdName(string cmdAndParamsStr)
+        {
+            int firstParamIndex = cmdAndParamsStr.IndexOf('/');
+            string cmdName = null;
+            if (firstParamIndex > 0)
             {
-                _isAutorunEnabled = false;
+                cmdName = cmdAndParamsStr.Remove(firstParamIndex).Trim();
             }
+            else
+            {
+                cmdName = cmdAndParamsStr.Trim();
+            }
+            if (string.IsNullOrWhiteSpace(cmdName))
+                throw new Exception($"Wrong cmd name in '{cmdAndParamsStr}'.");
+
+            return cmdName;
+        }
+
+        object[] ResolveCmdParams(string cmdAndParamsStr, ResolvedCmdInfo resolvedCmdInfo)
+        {
+
+            int firstParamIndex = cmdAndParamsStr.IndexOf('/');
+            string paramsStr = null;
+            if (firstParamIndex > 0)
+            {
+                paramsStr = cmdAndParamsStr.Substring(firstParamIndex).Trim();
+            }
+            else
+            {
+                paramsStr = "";
+            }
+            var parameters = resolvedCmdInfo.MethodInfo.GetParameters().ToParam();
+            var parametesValues = CmdStringToParamsBindings.Inst.ResolveFromCmd(paramsStr, parameters, splitter: '/');
+            return parametesValues.ToArray();
         }
 
         /// <summary>
@@ -227,19 +273,25 @@ namespace RollingOutTools.CmdLine
         /// <summary>
         /// Создает словарь с названиями команд cli и соответствующими им методы.
         /// </summary>
-        Dictionary<string, MethodInfo> CreateReflectionDict()
+        Dictionary<string, ResolvedCmdInfo> CreateReflectionDict()
         {
-            Dictionary<string, MethodInfo> cmdNameAndMethod = new Dictionary<string, MethodInfo>();
-            foreach (MethodInfo item in this.GetType().GetMethods())
+            var cmdNameAndMethod = new Dictionary<string, ResolvedCmdInfo>();
+            foreach (MethodInfo item in GetType().GetMethods())
             {
                 CmdInfoAttribute attr = item.GetCustomAttribute(typeof(CmdInfoAttribute)) as CmdInfoAttribute;
                 if (attr != null)
                 {
-                    //TODO: Remove attribute crunch.
-                    attr.CmdName = attr?.CmdName ?? TextExtensions.ToUnderscoreCase(item.Name);
+                    var name = attr?.CmdName ?? TextExtensions.ToUnderscoreCase(item.Name);
+                    var newCmdInfo = new ResolvedCmdInfo()
+                    {
+                        CmdName = name,
+                        Description = attr.Description,
+                        MethodInfo = item,
+                        OriginalMethodName = item.Name
+                    };
                     cmdNameAndMethod.Add(
-                        attr.CmdName,
-                        item)
+                        name,
+                        newCmdInfo)
                         ;
                 }
             }
@@ -258,14 +310,12 @@ namespace RollingOutTools.CmdLine
         /// <summary>
         /// Надстройка для получения ресурсов через this с кешированием и по имени метода из консоли, а не только по имени ресурса.
         /// </summary>
-        protected object ReadResource(Type resourceType,string resourceName, ReadResourseOptions options = null,
+        protected object ReadResource(Type resourceType, string resourceName, ReadResourseOptions options = null,
           [CallerMemberName]string memberName = null)
         {
             //Включаем автосчитывание если нужно
             options = options ?? new ReadResourseOptions();
-            options.UseAutoread = _isAutorunEnabled;
-
-            return Cmd.ReadResource(resourceType,memberName + "." + resourceName, options);
+            return Cmd.ReadResource(resourceType, memberName + "." + resourceName, options);
         }
     }
 }

@@ -13,8 +13,7 @@ namespace RollingOutTools.CmdLine
     public  class CmdInfoAttribute:Attribute
     {
         public string CmdName { get; set; }
+
         public string Description { get; set; }
-        public bool CanAutorun { get; set; } = true;
-        //public bool CmdExecutionOnly { get; set; }
     }
 }
