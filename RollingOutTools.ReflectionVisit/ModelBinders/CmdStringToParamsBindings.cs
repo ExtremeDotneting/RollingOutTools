@@ -41,7 +41,7 @@ namespace RollingOutTools.ReflectionVisit.ModelBinders
                         paramsDict[paramName],
                         paramType
                         );
-                    Console.WriteLine("--> " + currentValueStr);
+                    //Console.WriteLine("--> " + currentValueStr);
                     currentValue =Deserialize(paramType, currentValueStr);
                 }
                 catch (Exception ex)
